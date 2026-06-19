@@ -1,0 +1,62 @@
+{
+  "entities": {
+    "Product": {
+      "title": "Product",
+      "description": "An e-commerce item available in KUFULULA system",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "price": { "type": "number" },
+        "currency": { "type": "string", "enum": ["USD", "CDF"] },
+        "image": { "type": "string" },
+        "category": { "type": "string" },
+        "stock": { "type": "integer" },
+        "vendor": { "type": "string" },
+        "tags": { "type": "array" },
+        "isDraft": { "type": "boolean" },
+        "isPublished": { "type": "boolean" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "title", "description", "price", "currency", "image", "category", "stock", "vendor", "isDraft", "isPublished"]
+    },
+    "DirectTransaction": {
+      "title": "DirectTransaction",
+      "description": "An escrow payment holding and logistics ticket",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "productId": { "type": "string" },
+        "productTitle": { "type": "string" },
+        "price": { "type": "number" },
+        "currency": { "type": "string", "enum": ["USD", "CDF"] },
+        "buyerName": { "type": "string" },
+        "buyerEmail": { "type": "string" },
+        "paymentMethod": { "type": "string" },
+        "phoneNumber": { "type": "string" },
+        "escrowStatus": { "type": "string", "enum": ["SECURED", "RELEASED", "REFUNDED"] },
+        "kycRequiredScore": { "type": "number" },
+        "kycPassed": { "type": "boolean" },
+        "deliveryAddress": { "type": "string" },
+        "city": { "type": "string" },
+        "sheetLogged": { "type": "boolean" },
+        "calendarBooked": { "type": "boolean" },
+        "keepNoteCreated": { "type": "boolean" },
+        "timestamp": { "type": "string" }
+      },
+      "required": ["id", "productId", "productTitle", "price", "currency", "buyerName", "buyerEmail", "paymentMethod", "phoneNumber", "escrowStatus", "kycPassed", "deliveryAddress", "city"]
+    }
+  },
+  "firestore": {
+    "/products/{productId}": {
+      "schema": { "$ref": "#/entities/Product" },
+      "description": "Collection of e-commerce items"
+    },
+    "/transactions/{transactionId}": {
+      "schema": { "$ref": "#/entities/DirectTransaction" },
+      "description": "Secure logistics, escrow, and fintech transactions"
+    }
+  }
+}
