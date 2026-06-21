@@ -47,6 +47,34 @@
         "timestamp": { "type": "string" }
       },
       "required": ["id", "productId", "productTitle", "price", "currency", "buyerName", "buyerEmail", "paymentMethod", "phoneNumber", "escrowStatus", "kycPassed", "deliveryAddress", "city"]
+    },
+    "Vendor": {
+      "title": "Vendor",
+      "description": "A certified KUFULULA merchant/vendor profile with completed security KYC checkmarks",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "fullName": { "type": "string" },
+        "bio": { "type": "string" },
+        "whatsapp": { "type": "string" },
+        "telegram": { "type": "string" },
+        "docType": { "type": "string" },
+        "docNumber": { "type": "string" },
+        "docImage": { "type": "string" },
+        "faceImage": { "type": "string" },
+        "voiceText": { "type": "string" },
+        "references": { "type": "array" },
+        "decibelsLevel": { "type": "number" },
+        "networkStatus": { "type": "string" },
+        "deviceVersion": { "type": "string" },
+        "storeName": { "type": "string" },
+        "taxId": { "type": "string" },
+        "payoutChannel": { "type": "string" },
+        "verifiedAt": { "type": "string" }
+      },
+      "required": ["id", "email", "fullName", "storeName", "whatsapp"]
     }
   },
   "firestore": {
@@ -57,6 +85,10 @@
     "/transactions/{transactionId}": {
       "schema": { "$ref": "#/entities/DirectTransaction" },
       "description": "Secure logistics, escrow, and fintech transactions"
+    },
+    "/vendors/{vendorId}": {
+      "schema": { "$ref": "#/entities/Vendor" },
+      "description": "Secure master profiles for certified platform merchants"
     }
   }
 }

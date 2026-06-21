@@ -7,24 +7,99 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
-    // Auth helpers
+    // Auth & Identity Validation helpers
     function isSignedIn() {
       return request.auth != null;
     }
 
-    function isOwner(userId) {
-      return isSignedIn() && request.auth.uid == userId;
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Entity validator: Product
+    function isValidProduct(data) {
+      return data.keys().hasAll(['id', 'title', 'price', 'currency', 'isDraft', 'isPublished']) &&
+             data.id is string && data.id.size() <= 128 &&
+             data.title is string && data.title.size() <= 200 &&
+             data.price is number && data.price >= 0 &&
+             (data.currency == 'USD' || data.currency == 'CDF') &&
+             data.isDraft is bool &&
+             data.isPublished is bool;
+    }
+
+    // Entity validator: DirectTransaction
+    function isValidTransaction(data) {
+      return data.keys().hasAll(['id', 'productId', 'buyerName', 'buyerEmail', 'phoneNumber', 'escrowStatus']) &&
+             data.id is string && data.id.size() <= 128 &&
+             data.productId is string && data.productId.size() <= 128 &&
+             data.buyerName is string && data.buyerName.size() <= 200 &&
+             data.buyerEmail is string && data.buyerEmail.size() <= 200 &&
+             data.phoneNumber is string && data.phoneNumber.size() <= 32 &&
+             data.escrowStatus is string && (data.escrowStatus == 'SECURED' || data.escrowStatus == 'RELEASED' || data.escrowStatus == 'REFUNDED');
+    }
+
+    // Entity validator: Vendor
+    function isValidVendor(data) {
+      return data.keys().hasAll(['id', 'email', 'fullName', 'storeName', 'whatsapp']) &&
+             data.id is string && data.id.size() <= 128 &&
+             data.email is string && data.email.size() <= 200 &&
+             data.fullName is string && data.fullName.size() <= 200 &&
+             data.storeName is string && data.storeName.size() <= 200 &&
+             data.whatsapp is string && data.whatsapp.size() <= 32;
     }
 
     // Products Rules
     match /products/{productId} {
       allow read: if true; // Public catalog access
-      allow create, update, delete: if isSignedIn(); // Administrative writes
+      
+      // Seed dynamically or save valid product with strict schema validations
+      allow create: if isValidId(productId) && isValidProduct(incoming());
+      allow delete: if isSignedIn();
+      
+      // Update has 3 flows:
+      // 1. Fully logged-in administrative updates (must respect the schema)
+      // 2. Open client-side interaction updates (only changing likesCount or comments)
+      // 3. Complete product saves that validate against strict schema structures
+      allow update: if (
+        (isSignedIn() && isValidId(productId) && isValidProduct(incoming())) ||
+        (
+          isValidId(productId) && 
+          incoming().diff(existing()).affectedKeys().hasOnly(['likesCount', 'comments']) &&
+          incoming().likesCount is number
+        ) ||
+        (
+          isValidId(productId) && isValidProduct(incoming())
+        )
+      );
     }
 
     // Transactions rules (escrow & KYC)
     match /transactions/{transactionId} {
-      allow read, write: if isSignedIn();
+      // Allow any guest to register a checkout session synchronously
+      allow create: if isValidId(transactionId) && isValidTransaction(incoming());
+      
+      // Reading, updating or auditing transaction files requires logging in
+      allow read, update, delete: if isSignedIn();
+    }
+
+    // Vendor master profiles
+    match /vendors/{vendorId} {
+      allow read: if true;
+      allow create, update: if isValidId(vendorId) && isValidVendor(incoming());
+      allow delete: if isSignedIn();
+    }
+
+    // Connection testing
+    match /test/{document} {
+      allow read: if true;
     }
   }
 }

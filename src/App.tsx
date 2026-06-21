@@ -5,7 +5,8 @@ import {
   ChevronRight, RefreshCw, Smartphone, Check, Heart, Shield, HelpCircle, 
   ShieldCheck, Mic, Camera, Globe, Settings, Sliders, Play, RotateCcw,
   BookOpen, Compass, Package, Users, Eye, Sparkle, MessageCircle, Home, History,
-  Palette, Type, QrCode, Copy, Download
+  Palette, Type, QrCode, Copy, Download, ArrowLeft, ArrowUpRight, Share, Share2, X,
+  Bell, MapPin, Music, Flame, Award, Crown, Lock, AlertTriangle, Ticket, MessageSquare, Building2
 } from "lucide-react";
 
 import { Product, CartItem, UserAuth, DirectTransaction } from "./types";
@@ -20,6 +21,12 @@ import AdminPanel from "./components/AdminPanel";
 import CheckoutTunnel from "./components/CheckoutTunnel";
 import WorkspaceIntegrations from "./components/WorkspaceIntegrations";
 import MerchantConversationalLounge from "./components/MerchantConversationalLounge";
+import ProductCatalogGrid from "./components/ProductCatalogGrid";
+import MerchantVendorPortal from "./components/MerchantVendorPortal";
+
+// Static local assets safely handled by Vite
+// @ts-ignore
+import kufululaDesignOptions from "./assets/images/kufulula_design_options_1780511171548.png";
 
 // Preset Themes for Parameters selection
 interface ApplicationTheme {
@@ -36,8 +43,74 @@ interface ApplicationTheme {
 
 const THEMES: ApplicationTheme[] = [
   {
+    id: "sahel-noir",
+    name: "Option A: SAHEL NOIR",
+    bgClass: "bg-[#030712]",
+    cardClass: "bg-zinc-900/90 border border-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.1)]",
+    textClass: "text-white",
+    accentClass: "bg-[#00FF66] hover:bg-green-400 text-black font-extrabold shadow-sm transition-all",
+    accentTextClass: "text-[#00FF66]",
+    glowColor: "rgba(0, 255, 102, 0.2)",
+    badgeClass: "bg-[#00FF66]/10 border border-[#00FF66]/30 text-[#00FF66] font-mono"
+  },
+  {
+    id: "terracotta-clay",
+    name: "Option B: TERRACOTTA CLAY",
+    bgClass: "bg-[#FAF6F0]",
+    cardClass: "bg-[#FCFAF7] border border-[#E8DFD0] shadow-sm hover:shadow-md text-[#4E2A25] transition-all",
+    textClass: "text-[#4E2A25]",
+    accentClass: "bg-[#8F3E2B] hover:bg-[#A34B38] text-white font-bold transition-all",
+    accentTextClass: "text-[#8F3E2B]",
+    glowColor: "rgba(143, 62, 43, 0.15)",
+    badgeClass: "bg-[#8F3E2B]/10 border border-[#8F3E2B]/30 text-[#8F3E2B] font-serif font-bold"
+  },
+  {
+    id: "urban-brutalist",
+    name: "Option C: URBAN BRUTALIST",
+    bgClass: "bg-white",
+    cardClass: "bg-white border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-black",
+    textClass: "text-black",
+    accentClass: "bg-[#004BFF] hover:bg-[#0038C7] text-white border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] font-black transition-all",
+    accentTextClass: "text-[#004BFF]",
+    glowColor: "rgba(0, 75, 255, 0.15)",
+    badgeClass: "bg-white border border-black text-black font-mono font-black shadow-[1.5px_1.5px_0px_0px_rgba(0,0,0,1)]"
+  },
+  {
+    id: "white-noir",
+    name: "White / Noir",
+    bgClass: "bg-slate-50 text-black",
+    cardClass: "bg-white border border-slate-200/80 shadow-sm text-black",
+    textClass: "text-slate-900",
+    accentClass: "bg-black hover:bg-slate-800 text-white font-bold transition-all border border-black",
+    accentTextClass: "text-black",
+    glowColor: "rgba(0, 0, 0, 0.05)",
+    badgeClass: "bg-slate-100 border border-slate-300 text-black"
+  },
+  {
+    id: "abysses",
+    name: "Abysses",
+    bgClass: "bg-[#010a12] text-white",
+    cardClass: "bg-[#021424]/90 border border-cyan-500/30 text-sky-100 shadow-[0_0_15px_rgba(34,211,238,0.1)]",
+    textClass: "text-slate-200",
+    accentClass: "bg-cyan-400 hover:bg-cyan-300 text-zinc-950 font-bold shadow-[0_0_10px_rgba(34,211,238,0.25)]",
+    accentTextClass: "text-cyan-400",
+    glowColor: "rgba(34, 211, 238, 0.2)",
+    badgeClass: "bg-cyan-950/40 border border-cyan-500/30 text-cyan-400 font-mono font-bold"
+  },
+  {
+    id: "glass-water",
+    name: "Glass Water",
+    bgClass: "bg-[#e8f1f2]",
+    cardClass: "backdrop-blur-md bg-white/40 border border-white/60 shadow-[0_8px_32px_0_rgba(31,38,135,0.05)] text-zinc-800",
+    textClass: "text-zinc-800",
+    accentClass: "bg-zinc-400 hover:bg-zinc-500 text-white font-bold backdrop-blur-sm shadow-sm",
+    accentTextClass: "text-zinc-650",
+    glowColor: "rgba(100, 116, 139, 0.15)",
+    badgeClass: "backdrop-blur-sm bg-white/20 border border-neutral-300 text-zinc-650"
+  },
+  {
     id: "black-orange-default",
-    name: "Black Orange (défaut) 🍊",
+    name: "Black Orange (défaut)",
     bgClass: "bg-zinc-950",
     cardClass: "bg-zinc-900/80 border border-white/5",
     textClass: "text-white",
@@ -45,39 +118,6 @@ const THEMES: ApplicationTheme[] = [
     accentTextClass: "text-[#FF8C00]",
     glowColor: "rgba(255, 140, 0, 0.15)",
     badgeClass: "bg-[#FF8C00]/10 border border-[#FF8C00]/30 text-[#FF8C00]"
-  },
-  {
-    id: "white-clear-black",
-    name: "White Claire et Noir 🥛",
-    bgClass: "bg-slate-50",
-    cardClass: "bg-white border border-slate-200 shadow-sm",
-    textClass: "text-slate-900",
-    accentClass: "bg-slate-950 hover:bg-slate-800 text-white font-bold",
-    accentTextClass: "text-slate-950",
-    glowColor: "rgba(0, 0, 0, 0.05)",
-    badgeClass: "bg-slate-100 border border-slate-200 text-slate-950"
-  },
-  {
-    id: "abysses",
-    name: "Abysses 🌊",
-    bgClass: "bg-[#010a12]",
-    cardClass: "bg-[#031525]/90 border border-cyan-500/20",
-    textClass: "text-cyan-100",
-    accentClass: "bg-cyan-500 hover:bg-cyan-400 text-zinc-950 font-bold",
-    accentTextClass: "text-cyan-400",
-    glowColor: "rgba(6, 182, 212, 0.2)",
-    badgeClass: "bg-cyan-950/50 border border-cyan-500/30 text-cyan-400"
-  },
-  {
-    id: "water-glass-gray",
-    name: "Water Glass Gray 💎",
-    bgClass: "bg-[#18181b]",
-    cardClass: "bg-zinc-800/40 backdrop-blur-md border border-white/10",
-    textClass: "text-zinc-100",
-    accentClass: "bg-sky-400 hover:bg-sky-500 text-zinc-950 font-bold",
-    accentTextClass: "text-sky-400",
-    glowColor: "rgba(56, 189, 248, 0.15)",
-    badgeClass: "bg-sky-450/10 border border-sky-450/30 text-sky-400"
   }
 ];
 
@@ -91,52 +131,234 @@ interface AppFont {
 
 const FONTS: AppFont[] = [
   {
-    id: "calibri-soft",
-    name: "Calibri Signature 🌸",
-    fontFamily: '"Calibri", "Rubik", "Inter", sans-serif',
-    importUrl: "https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..0,900;1,300..1,900&display=swap"
+    id: "space-grotesk",
+    name: "Space Grotesk (Brutalist)",
+    fontFamily: '"Space Grotesk", "Inter", sans-serif',
+    importUrl: "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&display=swap"
   },
   {
-    id: "calibri-light",
-    name: "Calibri Light Soft ✨",
-    fontFamily: '"Calibri Light", "Segoe UI Light", "Rubik", sans-serif',
-    importUrl: "https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..0,900;1,300..1,900&display=swap"
-  },
-  {
-    id: "fine-prince",
-    name: "Fine Prince Royal 👑",
+    id: "cormorant-garamond",
+    name: "Cormorant (Terracotta)",
     fontFamily: '"Cormorant Garamond", serif',
     importUrl: "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300..0,700;1,300..1,700&display=swap"
   },
   {
-    id: "cambrillant-royal-rome",
-    name: "Cambrillant Royal Rome style 🏛️",
-    fontFamily: '"Cinzel", "Playfair Display", serif',
-    importUrl: "https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Playfair+Display:ital,wght@0,400..0,900;1,400..1,900&display=swap"
+    id: "jetbrains-mono",
+    name: "JetBrains (Sahel Noir)",
+    fontFamily: '"JetBrains Mono", monospace',
+    importUrl: "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap"
   },
   {
-    id: "majestueux-special",
-    name: "Majestueux Spécial ⚜️",
-    fontFamily: '"Playfair Display", "Times New Roman", serif',
-    importUrl: "https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..0,900;1,400..1,900&display=swap"
+    id: "calibri-soft",
+    name: "Calibri Signature",
+    fontFamily: '"Calibri", "Rubik", "Inter", sans-serif',
+    importUrl: "https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..0,900;1,300..1,900&display=swap"
   },
   {
     id: "modern-inter",
-    name: "Inter Classic 🇨🇭",
+    name: "Inter Classic",
     fontFamily: '"Inter", sans-serif',
     importUrl: "https://fonts.googleapis.com/css2?family=Inter:wght@300;450;650;850&display=swap"
+  },
+  {
+    id: "flavour-mix",
+    name: "Flavour Mix",
+    fontFamily: '"Space Grotesk", "JetBrains Mono", "Cormorant Garamond", "Calibri", sans-serif',
+    importUrl: "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&family=Cormorant+Garamond:ital,wght@0,300..0,700&family=JetBrains+Mono:wght@400;700&family=Inter:wght@450;650&display=swap"
   }
 ];
 
 export default function App() {
-  // Global States: View mode, active language, active theme, active font
-  const [viewMode, setViewMode] = useState<'shop' | 'favorites' | 'chat' | 'checkout' | 'workspace'>('shop');
-  const [language, setLanguage] = useState<AppLanguage>('fr');
-  const [activeTheme, setActiveTheme] = useState<ApplicationTheme>(THEMES[0]);
-  const [activeFont, setActiveFont] = useState<AppFont>(FONTS[0]);
+  // Global States: View mode, active language, active theme, active font (using persistent keys)
+  const [viewMode, setViewMode] = useState<'shop' | 'favorites' | 'chat' | 'checkout' | 'workspace' | 'product-detail'>('shop');
+  const [similarLimit, setSimilarLimit] = useState(4);
+  const [language, setLanguage] = useState<AppLanguage>(() => {
+    const s = localStorage.getItem("kufulula_language");
+    return (s as AppLanguage) || 'fr';
+  });
+  const [activeTheme, setActiveTheme] = useState<ApplicationTheme>(() => {
+    const s = localStorage.getItem("kufulula_theme");
+    const found = THEMES.find(t => t.id === s);
+    return found || THEMES[0];
+  });
+  const [activeFont, setActiveFont] = useState<AppFont>(() => {
+    const s = localStorage.getItem("kufulula_font");
+    const found = FONTS.find(f => f.id === s);
+    return found || FONTS[0];
+  });
+
+  // Keep chosen values persistent across page refreshes
+  useEffect(() => {
+    localStorage.setItem("kufulula_language", language);
+  }, [language]);
+
+  useEffect(() => {
+    localStorage.setItem("kufulula_theme", activeTheme.id);
+  }, [activeTheme]);
+
+  useEffect(() => {
+    localStorage.setItem("kufulula_font", activeFont.id);
+  }, [activeFont]);
 
   // Is parameters modal open
   const [isParamsOpen, setIsParamsOpen] = useState(false);
+  const [showMerchantPortal, setShowMerchantPortal] = useState(false);
+
+  // System Web Permissions & KYC Verification State
+  const [permissionsState, setPermissionsState] = useState(() => {
+    const saved = localStorage.getItem("kufulula_permissions_state_v3");
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {}
+    }
+    return {
+      camera: true,
+      microphone: true,
+      geolocation: true,
+      notifications: true,
+      autoinstall: true,
+      kyc: true,
+      media: true
+    };
+  });
+
+  const [showPermissionsModal, setShowPermissionsModal] = useState(() => {
+    return localStorage.getItem("kufulula_permissions_configured_v3") !== "true";
+  });
+
+  const handleTogglePermission = (key: string) => {
+    setPermissionsState((prev: any) => ({
+      ...prev,
+      [key]: !prev[key]
+    }));
+  };
+
+  const handleSaveAllPermissions = (allGranted: boolean) => {
+    let newState = { ...permissionsState };
+    if (allGranted) {
+      newState = {
+        camera: true,
+        microphone: true,
+        geolocation: true,
+        notifications: true,
+        autoinstall: true,
+        kyc: true,
+        media: true
+      };
+      setPermissionsState(newState);
+    }
+    localStorage.setItem("kufulula_permissions_state_v3", JSON.stringify(newState));
+    localStorage.setItem("kufulula_permissions_configured_v3", "true");
+    setShowPermissionsModal(false);
+  };
+
+  // Active fashion product currently showcased in the giant hero banner
+  const [heroCoutureId, setHeroCoutureId] = useState<string>("design");
+
+  // Typewriter effect states for the landing hero
+  const [typedLine1, setTypedLine1] = useState("");
+  const [typedLine2, setTypedLine2] = useState("");
+  const [activeTransitionTag, setActiveTransitionTag] = useState<string | null>(null);
+
+  useEffect(() => {
+    let index1 = 0;
+    let index2 = 0;
+    const line1Text = "Le Premier Soko d'Afrique Centrale";
+    const line2Text = "Sécurisé par Double Séquestre";
+    
+    setTypedLine1("");
+    setTypedLine2("");
+    let interval1: NodeJS.Timeout;
+    let interval2: NodeJS.Timeout;
+    
+    interval1 = setInterval(() => {
+      setTypedLine1(line1Text.substring(0, index1 + 1));
+      index1++;
+      if (index1 >= line1Text.length) {
+        clearInterval(interval1);
+        
+        // Start typing line 2 line-by-line
+        interval2 = setInterval(() => {
+          setTypedLine2(line2Text.substring(0, index2 + 1));
+          index2++;
+          if (index2 >= line2Text.length) {
+            clearInterval(interval2);
+          }
+        }, 45);
+      }
+    }, 45);
+    
+    return () => {
+      clearInterval(interval1);
+      clearInterval(interval2);
+    };
+  }, [activeTheme.id]);
+
+  const handleTagClickWithTransition = (tag: string) => {
+    setActiveTransitionTag(tag);
+    setTimeout(() => {
+      setSelectedCategory("All");
+      setSearchQuery(tag);
+      setViewMode('shop');
+      setActiveTransitionTag(null);
+    }, 1200); // Cinematic transition duration
+  };
+
+  // Pinterest reactivity states and action triggers
+  const [likedUpdatedTrigger, setLikedUpdatedTrigger] = useState(0);
+  const [shareToastText, setShareToastText] = useState<string | null>(null);
+
+  const handlePinterestLikeToggle = (pId: string) => {
+    const key = `k_liked_state_${pId}`;
+    const wasLiked = localStorage.getItem(key) === "true";
+    const nextLiked = !wasLiked;
+    localStorage.setItem(key, nextLiked ? "true" : "false");
+    
+    const likesKey = `k_likes_${pId}`;
+    const savedLikes = localStorage.getItem(likesKey);
+    const prod = allProducts.find(p => p.id === pId);
+    const currentLikes = savedLikes ? parseInt(savedLikes) : (prod?.likesCount || 0);
+    localStorage.setItem(likesKey, Math.max(0, currentLikes + (nextLiked ? 1 : -1)).toString());
+
+    // Update k_persistent_favorites
+    let favList: Product[] = [];
+    const stored = localStorage.getItem("k_persistent_favorites");
+    if (stored) {
+      try { favList = JSON.parse(stored); } catch(e) {}
+    }
+    if (nextLiked) {
+      if (prod && !favList.some(p => p.id === pId)) {
+        favList.push(prod);
+      }
+    } else {
+      favList = favList.filter(p => p.id !== pId);
+    }
+    localStorage.setItem("k_persistent_favorites", JSON.stringify(favList));
+
+    setLikedUpdatedTrigger(prev => prev + 1);
+  };
+
+  const handlePinterestShare = (title: string, pId: string) => {
+    const url = `${window.location.origin}/#product/${pId}`;
+    if (navigator.share) {
+      navigator.share({
+        title: title,
+        text: `Regarde ce produit superbe sur KUFULULA !`,
+        url: url
+      }).catch(() => {
+        navigator.clipboard.writeText(url).then(() => {
+          setShareToastText(`Lien de partage copié : "${title}" 🚀`);
+          setTimeout(() => setShareToastText(null), 3000);
+        });
+      });
+    } else {
+      navigator.clipboard.writeText(url).then(() => {
+        setShareToastText(`Lien de partage copié : "${title}" 🚀`);
+        setTimeout(() => setShareToastText(null), 3000);
+      });
+    }
+  };
 
   // Active dictionary mapping
   const dict: TranslationDictionary = translations[language];
@@ -158,6 +380,11 @@ export default function App() {
   // Selection detail modal
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
+  // Reset similar count limit on product selection changes
+  useEffect(() => {
+    setSimilarLimit(4);
+  }, [selectedProduct]);
+
   // Cart Status (Interactive sliding drawer)
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -169,6 +396,51 @@ export default function App() {
   const [showVoiceSearchModal, setShowVoiceSearchModal] = useState(false);
   const [voiceSearchStatus, setVoiceSearchStatus] = useState<'idle' | 'listening' | 'analyzing' | 'done'>('idle');
   const [vocalQueryText, setVocalQueryText] = useState("");
+
+  // AI Google Lens Search state (dedicated to Search Camera triggers)
+  const [showAiLensModal, setShowAiLensModal] = useState(false);
+  const [aiLensScanStatus, setAiLensScanStatus] = useState<'idle' | 'scanning' | 'matched' | 'failed'>('idle');
+  const [aiLensError, setAiLensError] = useState<string | null>(null);
+  const [selectedLensPreset, setSelectedLensPreset] = useState<string | null>(null);
+  const [aiLensCapturedImage, setAiLensCapturedImage] = useState<string | null>(null);
+  const [aiLensResult, setAiLensResult] = useState<{
+    detectedCategory: string;
+    primaryObject: string;
+    suggestedTags: string[];
+    confidenceScore: number;
+    description: string;
+  } | null>(null);
+
+  const LENS_PHOTO_PRESETS = [
+    {
+      id: "lens-mwinda",
+      name: "Lanterne Mwinda Solaire",
+      category: "Electronics",
+      image: "https://images.unsplash.com/photo-1540206395-68808572332f?w=500&auto=format&fit=crop&q=60",
+      description: "Lanterne solaire autonome d'urgence"
+    },
+    {
+      id: "lens-coffee",
+      name: "Pâtisserie du Fleuve",
+      category: "Food",
+      image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=500&auto=format&fit=crop&q=60",
+      description: "Service traiteur et viennoiseries de terroir"
+    },
+    {
+      id: "lens-fashion",
+      name: "Mode & Fashion Isolele",
+      category: "Fashion",
+      image: "https://images.unsplash.com/photo-1582533561751-ef6f6ab93a2e?w=500&auto=format&fit=crop&q=60",
+      description: "Draperies d'élégance africaine imprimée en cire"
+    },
+    {
+      id: "lens-book",
+      name: "La Dynastie Kongo",
+      category: "Livre",
+      image: "https://images.unsplash.com/photo-1541963463532-d68292c34b19?w=500&auto=format&fit=crop&q=60",
+      description: "Roman sur l'héritage ancestral Kongo"
+    }
+  ];
 
   // QR Code Simulator & Generator states
   const [showCameraLensModal, setShowCameraLensModal] = useState(false); // Map to existing control to prevent breakage, but renaming variables inside
@@ -275,6 +547,23 @@ export default function App() {
     return () => window.removeEventListener("hashchange", handleHashChange);
   }, []);
 
+  // Automated Infinite scroll similar products loader in product detail page
+  useEffect(() => {
+    if (viewMode !== 'product-detail') return;
+
+    const handleSimilarScroll = () => {
+      const scrollPosition = window.innerHeight + window.scrollY;
+      const totalPageHeight = document.documentElement.scrollHeight;
+
+      if (totalPageHeight - scrollPosition < 450) {
+        setSimilarLimit(prev => prev + 4);
+      }
+    };
+
+    window.addEventListener("scroll", handleSimilarScroll);
+    return () => window.removeEventListener("scroll", handleSimilarScroll);
+  }, [viewMode]);
+
   // Fetch expanded catalog products (52 rich items)
   useEffect(() => {
     loadCatalog();
@@ -284,6 +573,22 @@ export default function App() {
   const loadCatalog = async () => {
     setLoading(true);
     const list = await KDb.getProducts();
+    
+    // Read persisted favorites from local storage to prevent loss of dynamic or custom generated items
+    const storedFavsJson = localStorage.getItem("k_persistent_favorites");
+    if (storedFavsJson) {
+      try {
+        const storedFavs: Product[] = JSON.parse(storedFavsJson);
+        storedFavs.forEach((fav) => {
+          if (!list.some(p => p.id === fav.id)) {
+            list.push(fav);
+          }
+        });
+      } catch (err) {
+        console.error("Failed to parse k_persistent_favorites:", err);
+      }
+    }
+    
     setAllProducts(list);
     setFilteredProducts(list);
     setLoading(false);
@@ -387,8 +692,40 @@ export default function App() {
     setAdminUser(null);
   };
 
+  // Play a beautiful, futuristic double coin chime sound when adding to the cart
+  const playCartSound = () => {
+    try {
+      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioContextClass) return;
+      const ctx = new AudioContextClass();
+      
+      const osc1 = ctx.createOscillator();
+      const gain1 = ctx.createGain();
+      osc1.frequency.setValueAtTime(1100, ctx.currentTime);
+      gain1.gain.setValueAtTime(0.1, ctx.currentTime);
+      gain1.gain.exponentialRampToValueAtTime(0.002, ctx.currentTime + 0.12);
+      osc1.connect(gain1);
+      gain1.connect(ctx.destination);
+      osc1.start();
+      osc1.stop(ctx.currentTime + 0.12);
+      
+      const osc2 = ctx.createOscillator();
+      const gain2 = ctx.createGain();
+      osc2.frequency.setValueAtTime(1400, ctx.currentTime + 0.06);
+      gain2.gain.setValueAtTime(0.1, ctx.currentTime + 0.06);
+      gain2.gain.exponentialRampToValueAtTime(0.002, ctx.currentTime + 0.22);
+      osc2.connect(gain2);
+      gain2.connect(ctx.destination);
+      osc2.start(ctx.currentTime + 0.06);
+      osc2.stop(ctx.currentTime + 0.22);
+    } catch (e) {
+      console.warn("Audio Context cart sound error", e);
+    }
+  };
+
   // Cart operations
   const handleAddToCart = (product: Product) => {
+    playCartSound();
     setCart((prevCart) => {
       const index = prevCart.findIndex((item) => item.product.id === product.id);
       if (index >= 0) {
@@ -515,6 +852,129 @@ export default function App() {
         setVoiceSearchStatus('idle');
       }, 1000);
     }, 1200);
+  };
+
+  // AI GOOGLE LENS MOUNT & HANDLERS
+  const aiVideoRef = useRef<HTMLVideoElement>(null);
+  const [aiCameraStream, setAiCameraStream] = useState<MediaStream | null>(null);
+
+  const handleOpenAiLens = async () => {
+    setShowAiLensModal(true);
+    setAiLensScanStatus('idle');
+    setAiLensResult(null);
+    setSelectedLensPreset(null);
+    setAiLensError(null);
+    setAiLensCapturedImage(null);
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "environment" }
+      });
+      setAiCameraStream(stream);
+      setTimeout(() => {
+        if (aiVideoRef.current) {
+          aiVideoRef.current.srcObject = stream;
+        }
+      }, 350);
+    } catch (err: any) {
+      console.warn("AI Camera access issue:", err);
+      setAiLensError("Caméra physique non accessible dans ce mode. Veuillez importer un fichier ou choisir un modèle de démo ci-dessous !");
+    }
+  };
+
+  const handleCloseAiLens = () => {
+    if (aiCameraStream) {
+      try {
+        aiCameraStream.getTracks().forEach(track => track.stop());
+      } catch (e) {}
+      setAiCameraStream(null);
+    }
+    setShowAiLensModal(false);
+  };
+
+  const handleCaptureAiPhoto = () => {
+    if (aiVideoRef.current) {
+      try {
+        const video = aiVideoRef.current;
+        const canvas = document.createElement("canvas");
+        canvas.width = video.videoWidth || 640;
+        canvas.height = video.videoHeight || 480;
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          const b64 = canvas.toDataURL("image/jpeg");
+          setAiLensCapturedImage(b64);
+          setSelectedLensPreset(null);
+        }
+      } catch (e) {
+        console.error("Failed capturing AI snapshot", e);
+      }
+    }
+  };
+
+  const handleAiLensFileUpload = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const b64 = event.target?.result as string;
+      setAiLensCapturedImage(b64);
+      setSelectedLensPreset(null);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleTriggerAiLensSearch = async () => {
+    setAiLensScanStatus('scanning');
+    setAiLensError(null);
+
+    const payloadImage = selectedLensPreset ? `preset:${selectedLensPreset}` : aiLensCapturedImage;
+
+    if (!payloadImage) {
+      setAiLensError("Veuillez d'abord prendre une photo, charger une image ou sélectionner un de nos modèles ci-dessous.");
+      setAiLensScanStatus('failed');
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/gemini/lens", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ imageBase64: payloadImage })
+      });
+
+      if (!response.ok) {
+        throw new Error("L'intelligence artificielle n'a pas répondu.");
+      }
+
+      const result = await response.json();
+      if (result && result.primaryObject) {
+        setAiLensResult(result);
+        setAiLensScanStatus('matched');
+        playBeepSound();
+
+        // Stagger transitions to allow beautiful search update
+        setTimeout(() => {
+          setSearchQuery(result.primaryObject);
+          setSelectedCategory(result.detectedCategory || "All");
+          handleCloseAiLens();
+
+          const section = document.getElementById("catalog-section");
+          if (section) {
+            section.scrollIntoView({ behavior: "smooth" });
+          }
+        }, 3200);
+      } else {
+        throw new Error("Résultat d'analyse AI vide.");
+      }
+    } catch (err: any) {
+      console.error("AI Lens Search Error:", err);
+      setAiLensError("Échec de l'IA. Essai avec simulation de secours...");
+      setAiLensScanStatus('failed');
+    }
   };
 
   // QR CODE WEBRTC CAM & UPLOAD HANDLERS
@@ -698,19 +1158,122 @@ export default function App() {
       style={{ fontFamily: activeFont.fontFamily }} 
       className={`min-h-screen ${activeTheme.bgClass} ${activeTheme.textClass} transition-all duration-300 relative pb-24`}
     >
+      {/* Dynamic Theme skinning & Flavour Mix typography injection */}
+      <style>{`
+        ${activeFont.id === 'flavour-mix' ? `
+          h1, h2, h3, .heading-font, [class*="font-sans"] { font-family: 'Space Grotesk', 'Inter', sans-serif !important; letter-spacing: -0.015em; }
+          p, span, div, .body-font { font-family: 'Inter', sans-serif !important; }
+          .mono-font, .quantity, .price, .number, [class*="font-mono"] { font-family: 'JetBrains Mono', monospace !important; }
+          .signature-font, .italic-styled { font-family: 'Calibri', 'Rubik', sans-serif !important; font-style: italic !important; }
+        ` : ''}
+
+        ${activeTheme.id === 'abysses' ? `
+          /* Reposition orange colors to celestial abyssal cyan */
+          .text-[#FF8C00], .text-amber-500, .text-amber-400, .text-amber-600 { color: #22d3ee !important; }
+          .bg-[#FF8C00], .bg-amber-500, .bg-amber-600 { background-color: #22d3ee !important; color: #010a12 !important; }
+          .border-[#FF8C00], .border-amber-500 { border-color: #22d3ee !important; }
+          .bg-[#FF8C00]/10, .bg-amber-500/10, .bg-amber-500\\/10 { background-color: rgba(34, 211, 238, 0.1) !important; color: #22d3ee !important; }
+          .bg-[#FF8C00]/20, .bg-amber-500/20, .bg-amber-500\\/20 { background-color: rgba(34, 211, 238, 0.15) !important; }
+          /* Override hover and transition states */
+          .hover\\:bg-amber-600:hover, .hover\\:text-amber-500:hover { background-color: #22d3ee !important; color: #010a12 !important; }
+          .shadow-orange-500\\/10 { --tw-shadow-color: rgba(34, 211, 238, 0.15) !important; }
+        ` : activeTheme.id === 'glass-water' ? `
+          /* Reposition orange colors to glass grey and drop effects */
+          .text-[#FF8C00], .text-amber-500, .text-amber-400, .text-zinc-650 { color: #ffffff !important; }
+          .bg-[#FF8C00], .bg-amber-500, .bg-amber-600 { background-color: #64748b !important; color: #ffffff !important; }
+          .border-[#FF8C00], .border-amber-500 { border-color: #94a3b8 !important; }
+          .bg-[#FF8C00]/10, .bg-amber-500/10, .bg-amber-500\\/10 { background-color: rgba(255, 255, 255, 0.2) !important; color: #ffffff !important; }
+          .bg-[#FF8C00]/20, .bg-amber-500/20, .bg-amber-500\\/20 { background-color: rgba(255, 255, 255, 0.3) !important; }
+          .hover\\:bg-amber-600:hover, .hover\\:text-amber-500:hover { background-color: #64748b !important; color: #ffffff !important; }
+        ` : activeTheme.id === 'white-noir' ? `
+          /* Reposition orange to crisp solid black and white aesthetics */
+          .text-[#FF8C00], .text-amber-500, .text-amber-400 { color: #000000 !important; }
+          .bg-[#FF8C00], .bg-amber-500, .bg-amber-600 { background-color: #000000 !important; color: #ffffff !important; }
+          .border-[#FF8C00], .border-amber-500 { border-color: #000000 !important; }
+          .bg-[#FF8C00]/10, .bg-amber-500/10 { background-color: rgba(0, 0, 0, 0.05) !important; color: #000000 !important; }
+          .bg-[#FF8C00]/20, .bg-amber-500/20 { background-color: rgba(0, 0, 0, 0.1) !important; }
+        ` : ''}
+
+        /* Ensure heart likes are strictly bright red always */
+        .liked-heart, .heart-pulse { color: #ef4444 !important; fill: #ef4444 !important; }
+        @keyframes marquee {
+          0% { transform: translateX(0%); }
+          100% { transform: translateX(-50%); }
+        }
+        .animate-marquee {
+          display: flex;
+          width: max-content;
+          animation: marquee 25s linear infinite;
+        }
+      `}</style>
+
+      {/* Atmospheric Ephemeral Cloud Blobs (Abysses Theme Only) */}
+      {activeTheme.id === 'abysses' && (
+        <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+          <div className="absolute top-[10%] left-[5%] w-96 h-96 bg-cyan-500/5 rounded-full blur-[110px] animate-pulse" style={{ animationDuration: '8s' }} />
+          <div className="absolute top-[40%] right-[5%] w-[450px] h-[450px] bg-blue-600/5 rounded-full blur-[130px] animate-pulse" style={{ animationDuration: '12s', animationDelay: '2s' }} />
+          <div className="absolute bottom-[10%] left-[20%] w-80 h-80 bg-sky-400/5 rounded-full blur-[100px] animate-pulse" style={{ animationDuration: '10s', animationDelay: '4s' }} />
+        </div>
+      )}
+
+      {/* Water Drops Backdrop Effect (Glass Water Theme Only) */}
+      {activeTheme.id === 'glass-water' && (
+        <div className="fixed inset-0 pointer-events-none overflow-hidden z-0 bg-gradient-to-br from-[#e0f2fe]/40 via-[#f0f9ff]/50 to-[#e8f1f2]/40">
+          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-white/20 rounded-full blur-[100px]" />
+          <div className="absolute top-[30%] left-[-100px] w-80 h-80 bg-slate-300/10 rounded-full blur-[90px]" />
+        </div>
+      )}
       
       {/* MODERNE FLOATING PILL CAPSULE HEADER */}
       <div className="pt-4 px-4 sticky top-0 z-40 w-full max-w-7xl mx-auto">
-        <header className="bg-zinc-950/80 border border-white/10 backdrop-blur-md px-4 md:px-6 py-3 rounded-2xl md:rounded-3xl shadow-xl flex items-center justify-between">
+        <header className={`px-4 md:px-6 py-3 rounded-2xl md:rounded-3xl flex items-center justify-between transition-all duration-300 ${
+          activeTheme.id === 'sahel-noir'
+            ? 'bg-zinc-950/90 border border-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.15)] text-white'
+            : activeTheme.id === 'terracotta-clay'
+            ? 'bg-white/95 border border-[#E8DFD0] text-[#4E2A25] shadow-sm'
+            : activeTheme.id === 'urban-brutalist'
+            ? 'bg-white border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] text-black'
+            : activeTheme.id === 'abysses'
+            ? 'bg-[#021424]/90 border border-cyan-500/30 text-white shadow-[0_0_15px_rgba(34,211,238,0.15)] backdrop-blur-md'
+            : activeTheme.id === 'glass-water'
+            ? 'backdrop-blur-md bg-white/40 border border-white/60 text-zinc-900 shadow-lg'
+            : 'bg-zinc-950/80 border border-white/10 backdrop-blur-md text-white shadow-xl'
+        }`}>
           <div className="flex items-center gap-2">
             {/* Authentic glowing logo */}
-            <span className="text-base md:text-xl font-black tracking-widest text-[#FF8C00] uppercase select-none font-sans flex items-center gap-1.5">
-              <ShieldCheck className="w-5 h-5 text-white animate-pulse" />
-              {dict.appName}
-            </span>
-            <span className="bg-white/10 border border-white/10 text-white text-[8px] font-mono tracking-widest uppercase px-1.5 py-0.5 rounded font-bold">
-              DRC TRUSTED
-            </span>
+            {activeTheme.id === 'sahel-noir' ? (
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 bg-zinc-900 border border-emerald-500/55 rounded-lg flex items-center justify-center font-bold text-[#00FF66] text-sm shadow-[0_0_8px_rgba(16,185,129,0.4)] animate-pulse">
+                  T
+                </div>
+                <span className="text-sm md:text-base font-black tracking-widest text-white uppercase select-none font-sans">
+                  TECHNOVA
+                </span>
+              </div>
+            ) : activeTheme.id === 'terracotta-clay' ? (
+              <div className="flex items-center gap-2">
+                <div className="px-2 py-0.5 rounded bg-[#FAF6F0] border border-[#8F3E2B]/40 flex items-center justify-center font-serif font-black text-[#8F3E2B] text-xs">
+                  S&S
+                </div>
+                <span className="text-sm md:text-base font-serif font-black tracking-tight text-[#8F3E2B] select-none">
+                  🏺 Terracotta
+                </span>
+              </div>
+            ) : activeTheme.id === 'urban-brutalist' ? (
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 bg-[#004BFF] border-2 border-black rounded flex items-center justify-center font-black text-white text-sm shadow-[1.5px_1.5px_0px_0px_rgba(0,0,0,1)]">
+                  C
+                </div>
+                <span className="text-sm md:text-base font-mono font-black tracking-tight text-black uppercase select-none">
+                  CITYGRID
+                </span>
+              </div>
+            ) : (
+              <span className="text-base md:text-xl font-black tracking-widest text-[#FF8C00] uppercase select-none font-sans flex items-center gap-1.5">
+                <ShieldCheck className="w-5 h-5 text-white animate-pulse" />
+                {dict.appName}
+              </span>
+            )}
           </div>
 
           {/* Global actions: parameters trigger, cart tracker */}
@@ -718,19 +1281,43 @@ export default function App() {
             {/* UNIFIED PARAMETERS / LANGUAGE DIALOG TRIGGER */}
             <button
               onClick={() => setIsParamsOpen(true)}
-              className="flex items-center gap-2 px-3 py-1.5 border border-white/10 bg-zinc-900 hover:bg-zinc-800 rounded-xl text-amber-400 text-xs font-mono transition-all relative"
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs transition-all relative ${
+                activeTheme.id === 'sahel-noir'
+                  ? 'border border-emerald-500/40 bg-zinc-900 text-emerald-400 font-mono hover:bg-zinc-850'
+                  : activeTheme.id === 'terracotta-clay'
+                  ? 'border border-[#8F3E2B]/30 bg-[#FAF6F0] text-[#8F3E2B] font-serif hover:bg-[#E2D5C3]'
+                  : activeTheme.id === 'urban-brutalist'
+                  ? 'border-2 border-black bg-white text-black font-mono font-bold hover:bg-zinc-100 shadow-[1.5px_1.5px_0px_0px_rgba(0,0,0,1)]'
+                  : activeTheme.id === 'abysses'
+                  ? 'border border-cyan-500/40 bg-slate-950 text-cyan-400 font-mono hover:bg-cyan-950/85 shadow-[0_0_8px_rgba(34,211,238,0.1)]'
+                  : activeTheme.id === 'glass-water'
+                  ? 'border border-slate-300 bg-white/50 text-slate-700 font-sans hover:bg-white/85 shadow-sm'
+                  : 'border border-white/10 bg-zinc-900 hover:bg-zinc-800 text-amber-500 font-mono'
+              }`}
               title="Langues, Thèmes & Polices"
             >
-              <Globe className="w-3.5 h-3.5 text-amber-500" />
-              <span className="hidden sm:inline text-white text-[10px] font-bold">Réglages</span>
-              <Settings className="w-3.5 h-3.5 animate-spin-slow text-amber-500" />
-              <span className="absolute top-0 right-0 w-2 h-2 bg-amber-500 rounded-full animate-ping" />
+              <Globe className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline text-[10px] font-bold">Réglages</span>
+              <Settings className="w-3.5 h-3.5 animate-spin-slow" />
+              <span className={`absolute top-0 right-0 w-2 h-2 ${activeTheme.id === 'abysses' ? 'bg-cyan-400' : 'bg-amber-500'} rounded-full animate-ping`} />
             </button>
 
             {/* Cart Tracker */}
             <button
               onClick={() => setIsCartOpen(true)}
-              className="px-3 py-1.5 bg-[#FF8C00] text-zinc-950 hover:bg-amber-500 rounded-xl font-mono text-xs font-bold flex items-center gap-1.5 shadow-md hover:scale-105 active:scale-95 transition-all"
+              className={`px-3 py-1.5 rounded-xl text-xs flex items-center gap-1.5 transition-all ${
+                activeTheme.id === 'sahel-noir'
+                  ? 'bg-[#00FF66] text-black hover:bg-green-400 font-mono font-bold shadow-[0_0_10px_rgba(0,255,102,0.3)]'
+                  : activeTheme.id === 'terracotta-clay'
+                  ? 'bg-[#8F3E2B] text-white hover:bg-[#A34B38] font-serif font-bold'
+                  : activeTheme.id === 'urban-brutalist'
+                  ? 'bg-[#004BFF] text-white font-mono font-bold border-2 border-black hover:bg-[#0038C7] shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]'
+                  : activeTheme.id === 'abysses'
+                  ? 'bg-cyan-400 text-zinc-950 hover:bg-cyan-300 font-mono font-bold shadow-[0_0_10px_rgba(34,211,238,0.35)]'
+                  : activeTheme.id === 'glass-water'
+                  ? 'bg-slate-500 text-white hover:bg-slate-600 font-sans font-bold shadow-md'
+                  : 'bg-[#FF8C00] text-zinc-950 hover:bg-amber-500 font-mono font-bold shadow-md hover:scale-105 active:scale-95'
+              }`}
             >
               <ShoppingBag className="w-4 h-4" />
               <span className="font-extrabold">{cartCount}</span>
@@ -752,177 +1339,485 @@ export default function App() {
             className="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-10 space-y-6 md:space-y-10"
           >
             {/* IMMERSIVE BLACK, ORANGE, WHITE HERO CARD WITH GLASSMORPHISM OUTSTANDING VISUALS */}
-            <div className="relative text-white overflow-hidden flex flex-col justify-end min-h-[240px] md:min-h-[300px] rounded-3xl p-6 md:p-12 border border-white/10 bg-gradient-to-tr from-black via-zinc-950 to-zinc-900/60 shadow-2xl">
+            <div className={`relative overflow-hidden min-h-[420px] md:min-h-[480px] rounded-3xl p-6 md:p-10 transition-all duration-300 ${
+              activeTheme.id === 'sahel-noir'
+                ? 'border border-emerald-500/30 bg-black text-white shadow-[0_0_20px_rgba(16,185,129,0.08)]'
+                : activeTheme.id === 'terracotta-clay'
+                ? 'border border-[#E8DFD0] bg-gradient-to-tr from-[#FAF6F0] to-[#EAD8C3] text-[#4E2A25] shadow-sm'
+                : activeTheme.id === 'urban-brutalist'
+                ? 'border-2 border-black bg-white text-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]'
+                : 'border border-white/5 bg-gradient-to-tr from-black via-zinc-950 to-zinc-900/40 text-white shadow-2xl'
+            }`}>
               
               {/* Visual backdrop accents */}
               <div className="absolute inset-0 bg-grid-pattern opacity-10 pointer-events-none" />
-              <div className="absolute top-1/2 left-3/4 -translate-y-1/2 w-72 h-72 bg-amber-600/10 rounded-full filter blur-3xl pointer-events-none" />
-              <div className="absolute bottom-0 right-10 w-96 h-28 bg-[#FF8C00]/10 rounded-full filter blur-2xl pointer-events-none" />
-
-              <div className="relative space-y-3 z-10 max-w-3xl">
-                <span className="text-[9px] md:text-[10px] uppercase font-mono tracking-widest text-[#FF8C00] font-black flex items-center gap-1 bg-[#FF8C00]/10 border border-[#FF8C00]/30 w-max px-3 py-1 rounded-full backdrop-blur-md">
-                  <Sparkles className="w-3.5 h-3.5" />
-                  {dict.heroBadge}
-                </span>
-                
-                <h1 className="text-3xl md:text-5xl font-sans tracking-tight font-extrabold text-white leading-tight">
-                  {dict.heroTitle.split(".")[0]} <span className="text-[#FF8C00]">Kufulula.</span>
-                </h1>
-                
-                <p className="text-xs md:text-sm text-zinc-350 max-w-xl leading-relaxed">
-                  {dict.heroSub}
-                </p>
-
-                <div className="pt-2 flex flex-wrap items-center gap-4 text-[10px] font-mono text-zinc-400">
-                  <div className="flex items-center gap-2 bg-white/5 border border-white/5 px-2.5 py-1 rounded-md">
-                    <ShieldCheck className="w-4 h-4 text-green-500" />
-                    <span>Double Séquestre Mobile Money</span>
-                  </div>
-                  <div className="flex items-center gap-2 bg-white/5 border border-white/5 px-2.5 py-1 rounded-md">
-                    <Check className="w-4 h-4 text-amber-500" />
-                    <span>Intégration Google Lens & Gemini AI</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* CONTROLS AREA AND SEARCH OMNIBOX */}
-            <div className="space-y-4">
-              
-              {/* Core interactive Search bar & Camera voice lookup triggers */}
-              <div className="relative w-full max-w-2xl mx-auto">
-                <Search className="absolute left-4 top-3.5 w-5 h-5 text-zinc-500" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder={dict.searchPlaceholder}
-                  className="w-full pl-12 pr-28 py-3.5 bg-zinc-900/95 border border-white/10 rounded-2xl focus:outline-none focus:ring-1 focus:ring-amber-500 text-xs text-white shadow-xl placeholder-zinc-550"
-                />
-
-                {/* Micro clean transparent action icons on right side */}
-                <div className="absolute right-3.5 top-1.5 flex items-center gap-1.5">
-                  
-                  {/* Voice Ingestion */}
-                  <button
-                    onClick={handleVoiceTrigger}
-                    className="p-2 text-zinc-500 hover:text-amber-500 bg-transparent active:scale-95 transition-all text-xs border border-transparent rounded-lg"
-                    title="Recherche par commande vocale"
-                  >
-                    <Mic className="w-5 h-5" />
-                  </button>
-
-                  <div className="w-px h-6 bg-white/10" />
-
-                  {/* Camera / Google Lens Ingestion */}
-                  <button
-                    onClick={handleOpenLensCamera}
-                    className="p-2 text-zinc-500 hover:text-cyan-400 bg-transparent active:scale-95 transition-all relative"
-                    title="Camera / Google Lens matching"
-                  >
-                    <Camera className="w-5 h-5" />
-                    <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-cyan-400 rounded-full animate-ping" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Dynamic filter tags + "LIVRE" catalog switcher added */}
-              <div className="flex items-center justify-center gap-1.5 overflow-x-auto pb-2 flex-wrap pt-2">
-                {[
-                  { tag: "All", label: dict.categoryAll },
-                  { tag: "Electronics", label: dict.categoryElectronics },
-                  { tag: "Food", label: dict.categoryFood },
-                  { tag: "Fashion", label: dict.categoryFashion },
-                  { tag: "Home", label: dict.categoryHome },
-                  { tag: "Livre", label: dict.categoryBooks }
-                ].map((item) => (
-                  <button
-                    key={item.tag}
-                    onClick={() => setSelectedCategory(item.tag)}
-                    className={`px-4 py-2 rounded-xl text-xs font-mono font-bold tracking-tight whitespace-nowrap transition-all border transition-all ${
-                      selectedCategory === item.tag
-                        ? "bg-amber-500 text-zinc-950 border-amber-500 scale-95 shadow-md"
-                        : "bg-zinc-900 text-zinc-400 border-white/5 hover:text-white hover:bg-zinc-850"
-                    }`}
-                  >
-                    {item.label}
-                  </button>
-                ))}
-              </div>
-
-              {/* Reset Search results button */}
-              {searchQuery && (
-                <div className="text-center">
-                  <button
-                    onClick={() => setSearchQuery("")}
-                    className="text-xs text-amber-500 font-mono hover:underline flex items-center gap-1.5 mx-auto"
-                  >
-                    <RotateCcw className="w-3.5 h-3.5" />
-                    <span>Réinitialiser la recherche (Fuzzy match)</span>
-                  </button>
-                </div>
+              {activeTheme.id !== 'urban-brutalist' && (
+                <>
+                  <div className={`absolute top-1/2 left-1/3 -translate-y-1/2 w-80 h-80 rounded-full filter blur-[120px] pointer-events-none ${
+                    activeTheme.id === 'sahel-noir' ? 'bg-emerald-500/10' : activeTheme.id === 'terracotta-clay' ? 'bg-[#8F3E2B]/10' : 'bg-amber-600/12'
+                  }`} />
+                  <div className={`absolute bottom-0 right-1/4 w-[500px] h-36 rounded-full filter blur-[100px] pointer-events-none ${
+                    activeTheme.id === 'sahel-noir' ? 'bg-green-500/10' : activeTheme.id === 'terracotta-clay' ? 'bg-[#EAD8C3]/20' : 'bg-[#FF8C00]/8'
+                  }`} />
+                </>
               )}
+
+              {/* High-Fidelity Split-Screen Editorial Grid */}
+              <div className="relative w-full h-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-center z-10">
+                
+                {/* Left Side: Elegant Branding and Copy */}
+                <div className="lg:col-span-7 space-y-4 md:space-y-6">
+                  
+                  {/* Luxury Badging */}
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className={`text-[9px] md:text-[10px] uppercase font-mono tracking-widest font-black flex items-center gap-1 px-3 py-1 rounded-full backdrop-blur-md ${
+                      activeTheme.id === 'sahel-noir'
+                        ? 'text-[#00FF66] bg-[#00FF66]/10 border border-[#00FF66]/30'
+                        : activeTheme.id === 'terracotta-clay'
+                        ? 'text-[#8F3E2B] bg-[#8F3E2B]/10 border border-[#8F3E2B]/30 font-serif'
+                        : activeTheme.id === 'urban-brutalist'
+                        ? 'text-white bg-[#004BFF] border-2 border-black shadow-[1.5px_1.5px_0px_0px_rgba(0,0,0,1)]'
+                        : 'text-[#FF8C00] bg-[#FF8C00]/10 border border-amber-500/35 shadow-[0_0_15px_rgba(255,140,0,0.15)] animate-pulse'
+                    }`}>
+                      <Sparkles className="w-3.5 h-3.5" />
+                      {activeTheme.id === 'sahel-noir'
+                        ? "FUTURE TECH | MINIMALIST ARCHITECTURE"
+                        : activeTheme.id === 'terracotta-clay'
+                        ? "ARTISANAT DU CONGO | BOUE ET TERRE CRUE"
+                        : activeTheme.id === 'urban-brutalist'
+                        ? "STREET SELECTS | ZERO COMPROMISE"
+                        : "MAISON COUTURE ISOLELE × KUFULULA SOKO"
+                      }
+                    </span>
+
+                    <span className="text-[9px] font-mono border border-white/10 bg-white/5 text-zinc-400 px-2.5 py-1 rounded-full uppercase tracking-wider font-extrabold flex items-center gap-1.5">
+                      <Crown className="w-3 h-3 text-amber-500 fill-amber-500/20" /> COLLECTION DU ROY v3.4
+                    </span>
+                  </div>
+
+                  {/* Headline */}
+                  <h1 className="text-3xl md:text-5xl lg:text-6xl font-sans tracking-tight font-extrabold leading-[1.08] text-white">
+                    {activeTheme.id === 'sahel-noir' ? (
+                      <>
+                        Le Soko Tech <br />
+                        <span className="text-[#00FF66]">Sécurité Totale.</span>
+                      </>
+                    ) : activeTheme.id === 'terracotta-clay' ? (
+                      <>
+                        Poterie de la Dote <br />
+                        <span className="text-[#8F3E2B]">Terre du fleuve.</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="block text-2xl md:text-4xl lg:text-5xl text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-amber-400 tracking-tight font-extrabold pb-1">
+                          {typedLine1}
+                        </span>
+                        {typedLine1.length >= "Le Premier Soko d'Afrique Centrale".length - 2 && (
+                          <span className={`block text-xl md:text-3xl lg:text-4xl font-mono mt-1 ${activeTheme.id === 'abysses' ? 'text-cyan-400' : 'text-amber-500'}`}>
+                            {typedLine2}
+                            <span className="animate-pulse font-light ml-1">|</span>
+                          </span>
+                        )}
+                      </>
+                    )}
+                  </h1>
+
+                  {/* Subtext */}
+                  <p className={`text-xs md:text-sm max-w-xl leading-relaxed ${
+                    activeTheme.id === 'terracotta-clay' ? 'text-[#6E534E]' : activeTheme.id === 'urban-brutalist' ? 'text-zinc-800' : 'text-zinc-350'
+                  }`}>
+                    {activeTheme.id === 'sahel-noir'
+                      ? "Le grand carrefour autonome sécurisé par double signature de dépôt fiduciaire Mobile Money (Airtel, M-Pesa, Orange Money)."
+                      : activeTheme.id === 'terracotta-clay'
+                      ? "Découvrez l'élégance de nos pièces de terracotta façonnées à la main par nos maîtres potiers du Kongo Central."
+                      : "Achetez les créations exclusives de Haute Couture signées Isolele en toute tranquillité. Double séquestre actif pour rassurer créateurs et acquéreurs."
+                    }
+                  </p>
+
+                  {/* Structural Trust Badges & System Labels */}
+                  <div className={`pt-2 flex flex-wrap items-center gap-4 text-[10px] font-mono ${
+                    activeTheme.id === 'terracotta-clay' ? 'text-[#8F3E2B]' : activeTheme.id === 'urban-brutalist' ? 'text-black font-black' : 'text-zinc-400'
+                  }`}>
+                    <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl ${
+                      activeTheme.id === 'urban-brutalist' ? 'bg-zinc-100 border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]' : 'bg-white/5 border border-white/5'
+                    }`}>
+                      <ShieldCheck className="w-4 h-4 text-green-500" />
+                      <span>Double Séquestre Mobile Money</span>
+                    </div>
+                    <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl ${
+                      activeTheme.id === 'urban-brutalist' ? 'bg-zinc-100 border-2 border-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]' : 'bg-white/5 border border-white/5'
+                    }`}>
+                      <Check className="w-4 h-4 text-amber-500" />
+                      <span>IA de Recherche & Analyse Visuelle</span>
+                    </div>
+                  </div>
+
+                  {/* Live Interaction Stats */}
+                  <div className="flex flex-wrap items-center gap-4 pt-3 border-t border-white/5 text-zinc-500 text-[10px] font-mono font-medium">
+                    <div className="flex items-center gap-1.5">
+                      <Flame className="w-3.5 h-3.5 text-orange-500 fill-orange-500/10" />
+                      <span><span className="text-white font-bold">14.2k</span> Visiteurs</span>
+                    </div>
+                    <div className="w-1 h-1 rounded-full bg-zinc-700" />
+                    <div className="flex items-center gap-1.5">
+                      <Award className="w-3.5 h-3.5 text-amber-500" />
+                      <span><span className="text-amber-500 font-bold">Atelier Certifié</span></span>
+                    </div>
+                    <div className="w-1 h-1 rounded-full bg-zinc-700" />
+                    <div className="flex items-center gap-1.5">
+                      <Lock className="w-3.5 h-3.5 text-green-400" />
+                      <span><span className="text-green-400 font-bold">Double KYC</span></span>
+                    </div>
+                  </div>
+
+                </div>
+
+                {/* Right Side: High-End Fashion & Isolele Dynamic Interactive Showcase */}
+                <div className="lg:col-span-5 w-full flex flex-col items-center justify-center">
+                  <div className="relative w-full max-w-[340px] p-2 bg-zinc-950/90 border border-white/10 hover:border-amber-500/50 rounded-2xl transition-all duration-550 shadow-[0_15px_35px_rgba(0,0,0,0.6)] group">
+                    
+                    {/* Top luxury overlay label */}
+                    <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-amber-500 text-zinc-950 text-[8.5px] font-black font-mono tracking-widest px-3 py-1 rounded-full shadow-lg uppercase whitespace-nowrap">
+                      Chef-d'Œuvre à la Une
+                    </div>
+
+                    {/* Master Photograph Viewer with interactive transition */}
+                    <div className="aspect-[3/4] w-full rounded-xl overflow-hidden bg-zinc-900 relative">
+                      
+                      <AnimatePresence mode="wait">
+                        {heroCoutureId === 'design' && (
+                          <motion.img
+                            key="img-design"
+                            initial={{ opacity: 0, scale: 1.05 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.6 }}
+                            src={kufululaDesignOptions}
+                            alt="Isolele Royal Costume"
+                            referrerPolicy="no-referrer"
+                            className="w-full h-full object-cover"
+                          />
+                        )}
+                        {heroCoutureId === 'buste' && (
+                          <motion.img
+                            key="img-buste"
+                            initial={{ opacity: 0, scale: 1.05 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.6 }}
+                            src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=600&auto=format&fit=crop"
+                            alt="Buste Perlé Kongo"
+                            referrerPolicy="no-referrer"
+                            className="w-full h-full object-cover"
+                          />
+                        )}
+                        {heroCoutureId === 'bambou' && (
+                          <motion.img
+                            key="img-bambou"
+                            initial={{ opacity: 0, scale: 1.05 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.6 }}
+                            src="https://images.unsplash.com/photo-1582533561751-ef6f6ab93a2e?q=80&w=600&auto=format&fit=crop"
+                            alt="Robe Gala Osier"
+                            referrerPolicy="no-referrer"
+                            className="w-full h-full object-cover"
+                          />
+                        )}
+                      </AnimatePresence>
+
+                      <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent opacity-90" />
+                      
+                      {/* Interactive Float Controls */}
+                      <div className="absolute bottom-3 inset-x-3 text-center space-y-1">
+                        <span className="text-[8px] font-mono text-zinc-400 tracking-widest uppercase">
+                          Sa Majesté Roi Kufulula couture elite
+                        </span>
+                        <h4 className="text-xs font-black text-white tracking-tight uppercase truncate">
+                          {heroCoutureId === 'design' ? "Le Sceptre Court Royal d'Isolele" : heroCoutureId === 'buste' ? "Buste Perlé Masque Kongo" : "Robe de Gala Osier & Bambou"}
+                        </h4>
+                        <div className="flex items-center justify-between pt-1 border-t border-white/5">
+                          <span className="text-[10px] font-mono text-amber-500 font-bold">Prix de Référence</span>
+                          <span className="text-[10px] font-mono text-white font-bold">
+                            {heroCoutureId === 'design' ? "$12,500" : heroCoutureId === 'buste' ? "850,000 CDF" : "$3,400"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Quick change tabs with miniatures (the "fashion modes") */}
+                    <div className="mt-2.5 grid grid-cols-3 gap-1.5 p-1 bg-zinc-900/60 rounded-xl border border-white/5">
+                      <button
+                        onClick={() => setHeroCoutureId('design')}
+                        className={`relative aspect-square rounded-lg overflow-hidden border transition-all ${
+                          heroCoutureId === 'design' ? 'border-amber-500 scale-95 shadow-md' : 'border-white/5 hover:border-white/20'
+                        }`}
+                        title="Option 1"
+                      >
+                        <img src={kufululaDesignOptions} className="w-full h-full object-cover" alt="Thumb Design" referrerPolicy="no-referrer" />
+                        <span className="absolute bottom-0.5 right-0.5 text-[7px] bg-black/60 px-1 py-0.2 rounded font-mono text-amber-500">Isolele</span>
+                      </button>
+
+                      <button
+                        onClick={() => setHeroCoutureId('buste')}
+                        className={`relative aspect-square rounded-lg overflow-hidden border transition-all ${
+                          heroCoutureId === 'buste' ? 'border-amber-500 scale-95 shadow-md' : 'border-white/5 hover:border-white/20'
+                        }`}
+                        title="Option 2"
+                      >
+                        <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=600&auto=format&fit=crop" className="w-full h-full object-cover" alt="Thumb Buste" referrerPolicy="no-referrer" />
+                        <span className="absolute bottom-0.5 right-0.5 text-[7px] bg-black/60 px-1 py-0.2 rounded font-mono text-amber-500">Coutre</span>
+                      </button>
+
+                      <button
+                        onClick={() => setHeroCoutureId('bambou')}
+                        className={`relative aspect-square rounded-lg overflow-hidden border transition-all ${
+                          heroCoutureId === 'bambou' ? 'border-amber-500 scale-95 shadow-md' : 'border-white/5 hover:border-white/20'
+                        }`}
+                        title="Option 3"
+                      >
+                        <img src="https://images.unsplash.com/photo-1582533561751-ef6f6ab93a2e?q=80&w=600&auto=format&fit=crop" className="w-full h-full object-cover" alt="Thumb Osier" referrerPolicy="no-referrer" />
+                        <span className="absolute bottom-0.5 right-0.5 text-[7px] bg-black/60 px-1 py-0.2 rounded font-mono text-amber-500">Osier</span>
+                      </button>
+                    </div>
+
+                    {/* Open details CTA of highlighted product */}
+                    <button
+                      onClick={() => {
+                        const lookId = heroCoutureId === 'design' 
+                          ? 'fashion-isolele-design' 
+                          : heroCoutureId === 'buste' 
+                          ? 'fashion-isolele-panthere-nuit' 
+                          : 'fashion-isolele-mousse-moutarde';
+                        const targetProduct = allProducts.find(p => p.id === lookId || p.id === `prod-${lookId}`);
+                        if (targetProduct) {
+                          setSelectedProduct(targetProduct);
+                          window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }
+                      }}
+                      className="w-full mt-2.5 py-1.5 bg-amber-500/10 hover:bg-amber-500 text-amber-500 hover:text-zinc-950 font-black font-mono text-[9px] uppercase tracking-wider rounded-xl border border-amber-500/20 hover:border-amber-500 transition-all flex items-center justify-center gap-1 cursor-pointer"
+                    >
+                      <Eye className="w-3.5 h-3.5" />
+                      Consulter la fiche technique Escrow
+                    </button>
+
+                  </div>
+                </div>
+
+              </div>
+
             </div>
 
-            {/* CATALOG PRODUCTS DISPLAY GRID WITH LAZY RENDERING */}
-            {loading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {[1, 2, 3, 4, 5, 6, 7, 8].map((loaderId) => (
-                  <div key={loaderId} className="bg-zinc-900 border border-white/5 rounded-2xl p-4 space-y-4 animate-pulse">
-                    <div className="aspect-[16/13] bg-zinc-950 rounded-xl" />
-                    <div className="h-4 bg-zinc-950 rounded w-2/3" />
-                    <div className="h-3 bg-zinc-950 rounded w-full" />
-                    <div className="h-4 bg-zinc-950 rounded w-1/3" />
+            {/* SCROLL-REVEALED ENDLESS HORIZONTAL MARQUEE */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 30 }}
+              whileInView={{ opacity: 1, scale: 1, y: 0 }}
+              viewport={{ once: false, margin: "-100px" }}
+              transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+              className="relative overflow-hidden w-full py-6 rounded-3xl border border-white/5 bg-zinc-950/20 backdrop-blur-md shadow-2xl"
+            >
+              <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-zinc-950 via-zinc-950/80 to-transparent z-10 pointer-events-none" />
+              <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-zinc-950 via-zinc-950/80 to-transparent z-10 pointer-events-none" />
+              
+              <div className="px-6 mb-4 flex justify-between items-center">
+                <span className="text-[10px] font-mono tracking-widest text-[#FF8C00] uppercase font-black flex items-center gap-1.5 animate-pulse">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  Défilé d'Art Haute Couture Isolele — Galerie Royale
+                </span>
+                <span className="text-[9px] font-mono text-zinc-500 uppercase tracking-widest">
+                  ↔ Défilement Infini Continu
+                </span>
+              </div>
+
+              <div className="animate-marquee flex gap-4 w-max">
+                {[
+                  { title: "Buste Perlé Masque Kongo", img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=600&auto=format&fit=crop", desc: "Manteau velours d'apparat" },
+                  { title: "Rituel Souffleur de Feu", img: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=600&auto=format&fit=crop", desc: "Fibres de raphia sauvage" },
+                  { title: "Robe Osier & Bambou", img: "https://images.unsplash.com/photo-1582533561751-ef6f6ab93a2e?q=80&w=600&auto=format&fit=crop", desc: "Lattes de bambou tressé" },
+                  { title: "Robe Traîne Royale", img: "https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=600&auto=format&fit=crop", desc: "Drapé de cérémonie d'or" },
+                  { title: "Félin Impérial", img: "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?q=80&w=600&auto=format&fit=crop", desc: "Manteau léopard de parade" },
+                  { title: "Veste & Cape Mandala", img: "https://images.unsplash.com/photo-1539109136881-3be0616acf4b?q=80&w=600&auto=format&fit=crop", desc: "Dessins géométriques or" },
+                  { title: "Crépuscule au Flambeau", img: "https://images.unsplash.com/photo-1540206395-68808572332f?w=600&auto=format&fit=crop", desc: "Soie de lin de la dote" },
+                  { title: "Blazer Jute Recyclée", img: "https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=600&auto=format&fit=crop", desc: "Éthique dandy éco-conçu" },
+                  { title: "Franges Moutarde & Tresses", img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=600&auto=format&fit=crop", desc: "Portrait de reine à coiffe" }
+                ].concat([
+                  { title: "Buste Perlé Masque Kongo", img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=600&auto=format&fit=crop", desc: "Manteau velours d'apparat" },
+                  { title: "Rituel Souffleur de Feu", img: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=600&auto=format&fit=crop", desc: "Fibres de raphia sauvage" },
+                  { title: "Robe Osier & Bambou", img: "https://images.unsplash.com/photo-1582533561751-ef6f6ab93a2e?q=80&w=600&auto=format&fit=crop", desc: "Lattes de bambou tressé" },
+                  { title: "Robe Traîne Royale", img: "https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=600&auto=format&fit=crop", desc: "Drapé de cérémonie d'or" },
+                  { title: "Félin Impérial", img: "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?q=80&w=600&auto=format&fit=crop", desc: "Manteau léopard de parade" },
+                  { title: "Veste & Cape Mandala", img: "https://images.unsplash.com/photo-1539109136881-3be0616acf4b?q=80&w=600&auto=format&fit=crop", desc: "Dessins géométriques or" },
+                  { title: "Crépuscule au Flambeau", img: "https://images.unsplash.com/photo-1540206395-68808572332f?w=600&auto=format&fit=crop", desc: "Soie de lin de la dote" },
+                  { title: "Blazer Jute Recyclée", img: "https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=600&auto=format&fit=crop", desc: "Éthique dandy éco-conçu" },
+                  { title: "Franges Moutarde & Tresses", img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=600&auto=format&fit=crop", desc: "Portrait de reine à coiffe" }
+                ]).map((item, idx) => (
+                  <div key={idx} className="flex-none w-56 p-2 rounded-2xl bg-zinc-900 border border-white/5 shadow-md">
+                    <div className="aspect-[4/3] w-full rounded-xl overflow-hidden mb-2 relative group cursor-pointer">
+                      <img src={item.img} alt={item.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                      <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity p-2 text-center">
+                        <span className="text-[10px] font-mono text-[#FF8C00] uppercase tracking-widest font-black">Fashion Isolele</span>
+                        <p className="text-[8px] text-zinc-300 mt-1 font-sans">{item.title}</p>
+                      </div>
+                    </div>
+                    <p className="text-[11px] font-extrabold text-white tracking-tight truncate">{item.title}</p>
+                    <p className="text-[9px] text-[#FF8C00] font-mono truncate">{item.desc}</p>
                   </div>
                 ))}
               </div>
-            ) : productsToDisplay.length > 0 ? (
-              <div className="space-y-10">
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                  {productsToDisplay.map((p) => (
-                    <ProductCard
-                      key={p.id}
-                      product={p}
-                      onOpenDetails={(item) => setSelectedProduct(item)}
-                      onAddToCart={handleAddToCart}
-                      dict={dict}
-                      activeTheme={activeTheme}
-                    />
-                  ))}
-                </div>
+            </motion.div>
 
-                {/* Progressive Infinite Scroll indicator */}
-                {visibleCount < filteredProducts.length && (
-                  <div className="py-8 text-center flex flex-col items-center justify-center space-y-3">
-                    <div className="w-8 h-8 rounded-full border-2 border-[#FF8C00] border-t-transparent animate-spin" />
-                    <p className="text-[10px] font-mono tracking-widest text-zinc-500 uppercase animate-pulse">
-                      Chargement de l'écosystème ({visibleCount} / {filteredProducts.length} articles vus)
-                    </p>
-                    <button
-                      onClick={() => setVisibleCount(c => c + 12)}
-                      className="px-5 py-2.5 bg-zinc-900 hover:bg-zinc-850 border border-white/10 rounded-xl text-xs font-mono text-white text-semibold transition-all active:scale-95"
-                    >
-                      Charger plus d'articles (Scroll infini actif)
-                    </button>
-                  </div>
-                )}
+            {/* EXCLUSIVE ISOLELE COLLECTION & DRC MOST LOVED PRODUCT SHOWCASE */}
+            <div className="space-y-4 pt-2">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-white/5 pb-2">
+                <div>
+                  <h2 className="text-xs font-mono font-black tracking-widest text-[#FF8C00] uppercase flex items-center gap-1.5">
+                    <Sparkles className="w-4 h-4 text-white animate-pulse" />
+                    Collection Pro Exclusive Isolele & Coups de Cœur République Démocratique du Congo 🇨🇩
+                  </h2>
+                  <p className="text-[10px] text-zinc-400 mt-0.5">
+                    Drapés et coutures royales sous l'égide de la Couronne Soko
+                  </p>
+                </div>
+                <span className="text-[9px] font-mono text-zinc-500 uppercase mt-1 sm:mt-0 tracking-wider">
+                  Séquestre Double Actif
+                </span>
               </div>
-            ) : (
-              <div className="py-20 text-center text-zinc-500 max-w-sm mx-auto">
-                <Filter className="w-12 h-12 stroke-[1.2] mb-3 text-zinc-700 mx-auto" />
-                <p className="text-sm font-sans tracking-tight font-bold">{dict.noProductFound}</p>
-                <p className="text-xs text-zinc-500 mt-1">{dict.noProductSub}</p>
-                <button
-                  onClick={() => {
-                    setSearchQuery("");
-                    setSelectedCategory("All");
-                  }}
-                  className="mt-4 px-4 py-2 bg-zinc-900 border border-white/10 rounded-xl text-xs font-mono text-amber-500 hover:bg-zinc-850"
-                >
-                  Effacer les filtres
-                </button>
+
+              {/* Grid with 5 columns for vertical rectangles */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                {allProducts
+                  .filter(p => p.id.includes("isolele") || p.id.includes("fashion-isolele") || p.id.includes("superwax-congo"))
+                  .slice(0, 5) // Display first 5 matched
+                  .map((p) => {
+                    const isLovedRdc = p.id.includes("superwax-congo");
+                    return (
+                      <div 
+                        key={p.id}
+                        className="relative flex flex-col justify-between p-3.5 bg-zinc-950/70 hover:bg-zinc-950 border border-white/5 hover:border-amber-500/40 rounded-2xl transition-all duration-300 group shadow-lg"
+                      >
+                        {isLovedRdc ? (
+                          <div className="absolute top-2.5 right-2 balance bg-red-600 text-white text-[7.5px] font-bold tracking-wider px-2 py-0.5 rounded-full shadow z-10 animate-pulse uppercase flex items-center gap-1">
+                            <Heart className="w-2.5 h-2.5 fill-white stroke-white animate-pulse" /> RDC : Plus Aimé
+                          </div>
+                        ) : (
+                          <div className="absolute top-2.5 left-2.5 bg-amber-500/10 text-amber-500 text-[7px] font-black border border-amber-500/20 px-1.5 py-0.5 rounded uppercase">
+                            Isolele Pro
+                          </div>
+                        )}
+
+                        <div 
+                          onClick={() => {
+                            setSelectedProduct(p);
+                            setViewMode('product-detail');
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                          }}
+                          className="aspect-[3/4] w-full rounded-xl overflow-hidden bg-zinc-900 mb-3 cursor-pointer relative"
+                        >
+                          <img 
+                            src={p.image} 
+                            alt={p.title} 
+                            referrerPolicy="no-referrer"
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                          <div className="absolute bottom-2 inset-x-2 py-1 bg-black/60 backdrop-blur-sm rounded text-center text-[8px] font-mono text-amber-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                            Zoom Angles • Détails
+                          </div>
+                        </div>
+
+                        <div className="space-y-1">
+                          <h3 
+                            onClick={() => {
+                              setSelectedProduct(p);
+                              setViewMode('product-detail');
+                              window.scrollTo({ top: 0, behavior: 'smooth' });
+                            }}
+                            className="text-xs font-bold text-white hover:text-amber-500 transition-colors cursor-pointer line-clamp-1 tracking-tight"
+                          >
+                            {p.title}
+                          </h3>
+                          <div className="flex justify-between items-center text-[10px]">
+                            <span className="text-zinc-550 truncate max-w-[65px]">{p.vendor}</span>
+                            <span className="text-amber-500 font-mono font-bold">
+                              {p.currency === "CDF" ? `${p.price.toLocaleString()} CDF` : `$${p.price}`}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Action buttons inside vertical rectangle card */}
+                        <div className="mt-3.5 pt-2.5 border-t border-white/5 space-y-2">
+                          <button
+                            onClick={() => handleAddToCart(p)}
+                            className="w-full h-8 bg-amber-500 hover:bg-amber-600 text-zinc-950 font-black rounded-lg text-[9px] font-mono uppercase flex items-center justify-center gap-1 transition-all active:scale-95 cursor-pointer"
+                          >
+                            <ShoppingBag className="w-3 h-3" />
+                            <span>Ajouter au panier</span>
+                          </button>
+
+                          <div className="grid grid-cols-3 gap-0.5 text-[8px] font-mono text-zinc-400">
+                            <button
+                              onClick={() => {
+                                setSelectedProduct(p);
+                                setViewMode('product-detail');
+                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                              }}
+                              className="flex flex-col items-center gap-0.5 py-1 hover:bg-zinc-900 rounded text-red-500 cursor-pointer"
+                            >
+                              <Heart className="w-3 h-3 fill-red-500" />
+                              <span>{p.likesCount || 12} Likes</span>
+                            </button>
+
+                            <button
+                              onClick={() => {
+                                setSelectedProduct(p);
+                                setViewMode('product-detail');
+                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                              }}
+                              className="flex flex-col items-center gap-0.5 py-1 hover:bg-zinc-900 rounded text-amber-500 cursor-pointer"
+                            >
+                              <MessageCircle className="w-3 h-3" />
+                              <span>{p.comments?.length || 2} Cmds</span>
+                            </button>
+
+                            <button
+                              onClick={() => {
+                                setSelectedProduct(p);
+                                setViewMode('product-detail');
+                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                              }}
+                              className="flex flex-col items-center gap-0.5 py-1 hover:bg-zinc-900 rounded text-cyan-400 cursor-pointer"
+                            >
+                              <Share2 className="w-3 h-3" />
+                              <span>Partages</span>
+                            </button>
+                          </div>
+                        </div>
+
+                      </div>
+                    );
+                  })}
               </div>
-            )}
+            </div>
+
+            {/* REVOLUTIONARY DYNAMIC PRODUCT CATALOG GRID WITH FUZZY SEARCH, AUTO-COMPLETE, AND ATOMIC SHIMMER FILTERS */}
+            <ProductCatalogGrid
+              products={allProducts}
+              loading={loading}
+              onOpenDetails={(item) => {
+                setSelectedProduct(item);
+                setViewMode('product-detail');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              onAddToCart={handleAddToCart}
+              dict={dict}
+              activeTheme={activeTheme}
+              selectedCategory={selectedCategory}
+              setSelectedCategory={setSelectedCategory}
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              onVoiceTrigger={handleVoiceTrigger}
+              onLensCameraTrigger={handleOpenAiLens}
+            />
           </motion.main>
         )}
 
@@ -936,40 +1831,100 @@ export default function App() {
             className="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-10 space-y-6 md:space-y-10"
           >
             <div className="text-center max-w-xl mx-auto space-y-2">
-              <span className="text-[10px] uppercase font-mono tracking-widest text-red-500 font-black">VOS TRÉSORS PRÉFÉRÉS</span>
+              <span className="text-[10px] uppercase font-mono tracking-widest text-[#FF8C00] font-black">VOS TRÉSORS PRÉFÉRÉS</span>
               <h1 className="text-2xl font-sans font-extrabold flex items-center justify-center gap-2 text-white">
                 <Heart className="w-5.5 h-5.5 text-red-500 fill-red-500 animate-pulse" />
                 Mes Coups de Cœur
               </h1>
               <p className="text-xs text-zinc-400">
-                Retrouvez ici tous les articles coup de cœur que vous avez sélectionnés d'un simple clic sur le Soko de Kufulula.
+                Retrouvez vos articles coup de cœur sous forme de galerie asymétrique Pinterest premium.
               </p>
             </div>
 
-            {/* Grid of Liked Products */}
+            {/* Pinterest Masonry Layout */}
             {allProducts.filter(p => localStorage.getItem(`k_liked_state_${p.id}`) === "true").length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-5 space-y-5">
                 {allProducts
                   .filter(p => localStorage.getItem(`k_liked_state_${p.id}`) === "true")
-                  .map((p) => (
-                    <ProductCard
-                      key={p.id}
-                      product={p}
-                      onOpenDetails={(item) => setSelectedProduct(item)}
-                      onAddToCart={handleAddToCart}
-                      dict={dict}
-                      activeTheme={activeTheme}
-                    />
-                  ))
+                  .map((p, idx) => {
+                    const heights = ["h-64", "h-80", "h-72", "h-96", "h-[280px]", "h-[400px]", "h-[320px]"];
+                    const hClass = heights[idx % heights.length];
+                    const numLikes = localStorage.getItem(`k_likes_${p.id}`) || p.likesCount || 0;
+
+                    return (
+                      <div 
+                        key={p.id}
+                        className="break-inside-avoid relative group overflow-hidden rounded-3xl border border-white/5 bg-zinc-950/40 p-2 text-white transition-all duration-300 hover:shadow-2xl hover:border-white/20 mb-5"
+                      >
+                        {/* Pure Image block with variable height */}
+                        <div 
+                          className={`relative rounded-2xl overflow-hidden cursor-pointer ${hClass}`}
+                          onClick={() => {
+                            setSelectedProduct(p);
+                            setViewMode('product-detail');
+                          }}
+                        >
+                          <img 
+                            src={p.image} 
+                            alt={p.title} 
+                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                          />
+                          {/* Hover effect to read more */}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
+                            <span className="text-[10px] font-mono tracking-widest text-amber-500 uppercase font-bold flex items-center gap-1">
+                              <Eye className="w-3 h-3" />
+                              Détails complets (cliquer)
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Product details below the image */}
+                        <div className="p-3.5 space-y-2">
+                          <h3 
+                            onClick={() => {
+                              setSelectedProduct(p);
+                              setViewMode('product-detail');
+                            }}
+                            className="text-xs font-black tracking-tight leading-snug truncate hover:text-[#FF8C00] transition-colors cursor-pointer"
+                          >
+                            {p.title}
+                          </h3>
+                          <p className="text-[10px] text-zinc-400 line-clamp-2 leading-relaxed">
+                            {p.description}
+                          </p>
+                          
+                          {/* Exactly two actions: Like (left) and Share (right) */}
+                          <div className="flex justify-between items-center pt-2 border-t border-white/5">
+                            <button 
+                              onClick={() => handlePinterestLikeToggle(p.id)}
+                              className="flex items-center gap-1.5 px-3 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-00 rounded-full text-[10px] font-mono transition-all duration-200"
+                              title="Aimer l'article"
+                            >
+                              <Heart className="w-3.5 h-3.5 text-red-500 fill-red-500 liked-heart" />
+                              <span className="liked-heart font-bold">{numLikes}</span>
+                            </button>
+
+                            <button 
+                              onClick={() => handlePinterestShare(p.title, p.id)}
+                              className="p-1.5 bg-zinc-900/80 hover:bg-zinc-850 text-zinc-400 hover:text-white rounded-full transition-all duration-200"
+                              title="Partager le soko"
+                            >
+                              <Share className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
                 }
               </div>
             ) : (
-              <div className="py-20 text-center max-w-sm mx-auto space-y-4 bg-zinc-900/40 border border-white/5 rounded-3xl p-6">
-                <Heart className="w-12 h-12 stroke-[1.2] text-zinc-650 mx-auto" />
+              <div className="py-20 text-center max-w-sm mx-auto space-y-4 bg-zinc-900/10 border border-white/5 rounded-3xl p-6">
+                <Heart className="w-12 h-12 stroke-[1.2] text-zinc-600 mx-auto" />
                 <div className="space-y-1">
                   <p className="text-sm font-bold text-white">Aucun coup de cœur</p>
                   <p className="text-xs text-zinc-500 leading-normal">
-                    Laissez parler vos sens en cliquant sur l'icône de cœur ❤️ de vos produits préférés lors de votre exploration du marché.
+                    Laissez parler vos sens en cliquant sur l'icône de cœur <Heart className="w-3.5 h-3.5 text-red-500 fill-red-500 inline align-middle mx-1" /> de vos produits préférés lors de votre exploration du marché.
                   </p>
                 </div>
                 <button
@@ -977,6 +1932,262 @@ export default function App() {
                   className="px-5 py-2.5 bg-amber-500 text-zinc-950 font-mono text-xs font-bold rounded-xl hover:bg-amber-600 transition-all uppercase"
                 >
                   Découvrir le Soko
+                </button>
+              </div>
+            )}
+          </motion.main>
+        )}
+
+        {/* FULL PRODUCT DETAIL VIEW */}
+        {viewMode === 'product-detail' && (
+          <motion.main
+            key="product-detail-view"
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -50 }}
+            className="max-w-4xl mx-auto px-4 py-8 space-y-8"
+          >
+            {/* Back button */}
+            <div className="flex justify-between items-center">
+              <button
+                onClick={() => setViewMode('shop')}
+                className="flex items-center gap-2 text-xs font-mono text-zinc-400 hover:text-white transition-colors bg-zinc-900/50 px-4 py-2 rounded-xl border border-white/5"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Retour au Soko
+              </button>
+              <span className="text-[10px] font-mono tracking-widest text-[#FF8C00] uppercase font-bold">
+                Fiche d'Origine Premium
+              </span>
+            </div>
+
+            {selectedProduct ? (
+              <div className="space-y-10">
+                {/* Product Title and Brand */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-mono bg-amber-500/10 text-amber-500 px-2.5 py-1 rounded-full uppercase border border-amber-500/20 font-bold">
+                      {selectedProduct.category}
+                    </span>
+                    {selectedProduct.vendor && (
+                      <span className="text-[10px] font-mono text-zinc-400">
+                        Par {selectedProduct.vendor}
+                      </span>
+                    )}
+                  </div>
+                  <h1 className="text-2xl md:text-3xl font-sans font-black tracking-tight text-white">
+                    {selectedProduct.title}
+                  </h1>
+                </div>
+
+                {/* Horizontal perspective scrollbar (At least 5 perspectives) */}
+                <div className="space-y-2">
+                  <p className="text-[10px] font-mono text-zinc-400 uppercase tracking-widest flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-[#FF8C00]" />
+                    Galerie multi-angles d'orfèvre (Défiler horizontalement ↔)
+                  </p>
+                  
+                  <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-zinc-850 scrollbar-track-transparent snap-x">
+                    {[
+                      selectedProduct.image,
+                      // Synthetic varied angles based on category/title to guarantee high resolution match
+                      selectedProduct.category === "Livre" 
+                        ? "https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&w=600&q=80" // Book page macro
+                        : selectedProduct.category === "Fashion"
+                        ? "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=600&q=80" // Fabric luxury
+                        : "https://images.unsplash.com/photo-1468495244122-4a67e719000a?auto=format&fit=crop&w=600&q=80", // Close metallic
+                      
+                      selectedProduct.category === "Livre"
+                        ? "https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=600&q=80"
+                        : selectedProduct.category === "Fashion"
+                        ? "https://images.unsplash.com/photo-1483981588606-2719b29e001a?auto=format&fit=crop&w=600&q=80"
+                        : "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80",
+
+                      selectedProduct.category === "Livre"
+                        ? "https://images.unsplash.com/photo-1474932430478-367db2683bfc?auto=format&fit=crop&w=600&q=80"
+                        : selectedProduct.category === "Fashion"
+                        ? "https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=600&q=80"
+                        : "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=600&q=80",
+
+                      selectedProduct.category === "Livre"
+                        ? "https://images.unsplash.com/photo-1495640388908-05fa85288e61?auto=format&fit=crop&w=600&q=80" 
+                        : selectedProduct.category === "Fashion"
+                        ? "https://images.unsplash.com/photo-1539109136881-3be0616acf4b?auto=format&fit=crop&w=600&q=80"
+                        : "https://images.unsplash.com/photo-1572635196237-14b3f281503f?auto=format&fit=crop&w=600&q=80",
+
+                      "https://images.unsplash.com/photo-1511556532299-8f662fc26c06?auto=format&fit=crop&w=600&q=80" // High detail presentation box/packaging
+                    ].map((imgUrl, i) => (
+                      <div 
+                        key={i} 
+                        className="flex-none w-72 h-48 md:w-80 md:h-56 rounded-2xl overflow-hidden border border-white/5 bg-zinc-900 snap-center cursor-zoom-in group relative"
+                      >
+                        <img 
+                          src={imgUrl} 
+                          alt={`${selectedProduct.title} - angle ${i+1}`} 
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        />
+                        <div className="absolute top-2 left-2 px-2.5 py-1 bg-black/60 backdrop-blur-md rounded-full text-[8px] font-mono font-bold tracking-wider uppercase text-zinc-300">
+                          Angle #{i + 1}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Strict Two Buttons: Like and Share ONLY */}
+                <div className="flex items-center justify-between p-4 bg-zinc-900/40 rounded-2xl border border-white/5">
+                  <div className="space-y-0.5">
+                    <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">Prix conseillé</p>
+                    <p className="text-xl font-mono font-black text-amber-500">
+                      {selectedProduct.price.toLocaleString()} {selectedProduct.currency || "USD"}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    {/* Like button on the left */}
+                    <button 
+                      onClick={() => handlePinterestLikeToggle(selectedProduct.id)}
+                      className="flex items-center gap-2 px-6 py-3 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-xl text-xs font-mono font-bold transition-all border border-red-500/25 active:scale-95"
+                    >
+                      <Heart className="w-4 h-4 text-red-500 fill-red-500 liked-heart" />
+                      <span className="liked-heart font-bold">
+                        {localStorage.getItem(`k_likes_${selectedProduct.id}`) || selectedProduct.likesCount || 0}
+                      </span>
+                    </button>
+
+                    {/* Share button on the right */}
+                    <button 
+                      onClick={() => handlePinterestShare(selectedProduct.title, selectedProduct.id)}
+                      className="flex items-center gap-2 px-6 py-3 bg-zinc-850 hover:bg-zinc-800 text-white rounded-xl text-xs font-mono font-bold transition-all border border-white/5 active:scale-95"
+                    >
+                      <Share className="w-4 h-4" />
+                      <span>Partager</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Description and Clickable Tags */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="md:col-span-2 space-y-4">
+                    <h3 className="text-xs font-mono uppercase tracking-widest text-zinc-500">
+                      Description authentique
+                    </h3>
+                    <p className="text-sm text-zinc-300 leading-relaxed font-sans whitespace-pre-wrap">
+                      {selectedProduct.description}
+                    </p>
+                  </div>
+
+                  <div className="space-y-4">
+                    <h3 className="text-xs font-mono uppercase tracking-widest text-zinc-500">
+                      Tags de Référence (cliquables)
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {[
+                        selectedProduct.category,
+                        ...(selectedProduct.tags || []),
+                        selectedProduct.vendor || "Isolele"
+                      ].map((tag, i) => (
+                        <button
+                          key={i}
+                          onClick={() => handleTagClickWithTransition(tag)}
+                          className="px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-xs font-mono text-[#FF8C00] rounded-xl border border-white/5 transition-all text-left uppercase flex items-center gap-1.5 hover:border-amber-500/30 font-bold"
+                        >
+                          # {tag}
+                          <ArrowUpRight className="w-3 h-3 text-zinc-500 group-hover:text-amber-500 transition-colors" />
+                        </button>
+                      ))}
+                    </div>
+                    <p className="text-[10px] text-zinc-500 italic leading-snug">
+                      Cliquez sur un tag pour afficher un flux d'articles similaires de même type avec une transition fluide.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Similar Products continuously loading infinite feed */}
+                <div className="border-t border-white/5 pt-8 space-y-6">
+                  <div className="flex justify-between items-center">
+                    <div className="space-y-1">
+                      <h2 className="text-lg font-sans font-extrabold text-white">
+                        Articles Similaires Recommandés
+                      </h2>
+                      <p className="text-xs text-zinc-400">
+                        Inspiré par vos goûts esthétiques sur le Soko de Kufulula.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    {allProducts
+                      .filter(p => p.id !== selectedProduct.id && p.category === selectedProduct.category)
+                      .slice(0, similarLimit)
+                      .map((p) => {
+                        const numLikes = localStorage.getItem(`k_likes_${p.id}`) || p.likesCount || 0;
+                        return (
+                          <div 
+                            key={p.id}
+                            className="p-3 bg-zinc-900/30 hover:bg-zinc-900/60 rounded-2xl border border-white/5 transition-all flex gap-4 cursor-pointer group"
+                            onClick={() => {
+                              setSelectedProduct(p);
+                              // Scroll up smoothly to read updated product
+                              window.scrollTo({ top: 0, behavior: 'smooth' });
+                            }}
+                          >
+                            <div className="w-24 h-24 rounded-xl overflow-hidden bg-zinc-950 flex-none relative">
+                              <img src={p.image} alt={p.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                            </div>
+                            <div className="flex flex-col justify-between py-1 min-w-0">
+                              <div className="space-y-1 min-w-0">
+                                <h4 className="text-xs font-bold text-white truncate group-hover:text-[#FF8C00] transition-colors">
+                                  {p.title}
+                                </h4>
+                                <p className="text-[10px] text-zinc-400 line-clamp-2">
+                                  {p.description}
+                                </p>
+                              </div>
+                              <div className="flex justify-between items-center text-[10px] font-mono font-semibold pt-1">
+                                <span className="text-amber-500">{p.price.toLocaleString()} {p.currency || "USD"}</span>
+                                <span className="text-zinc-500 flex items-center gap-1">
+                                  <Heart className="w-2.5 h-2.5 text-zinc-650" /> {numLikes}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })
+                    }
+                  </div>
+
+                  {/* Endless scrolling infinite stream simulator */}
+                  {allProducts.filter(p => p.id !== selectedProduct.id && p.category === selectedProduct.category).length > similarLimit ? (
+                    <div className="py-8 text-center space-y-4 border-t border-white/5">
+                      <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest animate-pulse">
+                        Flux d'articles similaires disponible en continu ({selectedProduct.category})
+                      </p>
+                      <button
+                        onClick={() => setSimilarLimit(prev => prev + 4)}
+                        className="px-6 py-2.5 bg-amber-500 hover:bg-amber-600 border border-amber-600 rounded-xl text-xs font-mono text-zinc-950 font-bold transition-all hover:scale-95 cursor-pointer"
+                      >
+                        ∞ Faire défiler et afficher plus de produits similaires
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="py-8 text-center border-t border-white/5">
+                      <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest italic">
+                        Vous avez atteint la limite de notre collection exceptionnelle d'articles de type {selectedProduct.category} 🎉
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+              </div>
+            ) : (
+              <div className="py-20 text-center space-y-4">
+                <p className="text-sm text-zinc-400">Aucun produit sélectionné.</p>
+                <button
+                  onClick={() => setViewMode('shop')}
+                  className="px-4 py-2 bg-amber-500 text-zinc-950 rounded-xl text-xs font-bold uppercase font-mono"
+                >
+                  Retourner au Soko
                 </button>
               </div>
             )}
@@ -1013,6 +2224,7 @@ export default function App() {
               cart={cart}
               onSuccess={handleCheckoutSuccess}
               onCancel={() => setViewMode('shop')}
+              activeTheme={activeTheme}
             />
           </motion.div>
         )}
@@ -1051,108 +2263,158 @@ export default function App() {
               initial={{ scale: 0.95, y: 15 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.95, y: 15 }}
-              className="relative bg-zinc-900 border border-white/10 p-6 rounded-3xl max-w-lg w-full text-white shadow-2xl z-10 space-y-5 max-h-[90vh] overflow-y-auto"
+              className={`relative ${activeTheme ? activeTheme.cardClass : "bg-zinc-900/95 border border-white/10 text-white"} p-6 rounded-3xl max-w-sm w-full shadow-2xl z-10 space-y-5 max-h-[90vh] overflow-y-auto`}
             >
               <div className="flex justify-between items-center pb-3 border-b border-white/10">
                 <div className="space-y-0.5">
-                  <span className="text-[9px] font-mono tracking-widest text-[#FF8C00] uppercase font-bold">KUFULULA PREFERENCES Hub</span>
-                  <h3 className="text-sm font-sans font-extrabold text-white uppercase flex items-center gap-1.5">
-                    <Sliders className="w-4 h-4 text-amber-500" />
+                  <span className={`text-[9px] font-mono tracking-widest ${activeTheme.id === 'abysses' ? 'text-cyan-400' : 'text-amber-500'} uppercase font-bold`}>KUFULULA PREFERENCES Hub</span>
+                  <h3 className="text-sm font-sans font-extrabold uppercase flex items-center gap-1.5">
+                    <Sliders className={`w-4 h-4 ${activeTheme.id === 'abysses' ? 'text-cyan-400' : 'text-amber-500'}`} />
                     {dict.settingsTitle}
                   </h3>
                 </div>
                 <button
                   onClick={() => setIsParamsOpen(false)}
-                  className="p-2 bg-zinc-950 hover:bg-zinc-800 border border-white/5 rounded-full text-zinc-400 hover:text-white transition-all text-xs"
+                  className="p-2 bg-zinc-950 hover:bg-zinc-850 border border-white/5 rounded-full text-zinc-400 hover:text-white transition-all"
                   title="Fermer"
                 >
-                  ✕
+                  <X className="w-3.5 h-3.5" />
                 </button>
               </div>
 
-              {/* Language Selection Grid */}
-              <div className="space-y-2.5">
+              {/* Language Selection - Dropdown List */}
+              <div className="space-y-2">
                 <label className="text-[10px] font-mono text-amber-400 uppercase tracking-widest block flex items-center gap-1.5 font-bold">
-                  <Globe className="w-3.5 h-3.5" />
+                  <Globe className="w-3.5 h-3.5 text-blue-400" />
                   Sélection de la langue
                 </label>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  {[
-                    { id: 'fr', name: 'Français', flag: '🇫🇷' },
-                    { id: 'en', name: 'English', flag: '🇺🇸' },
-                    { id: 'ln', name: 'Lingala', flag: '🇨🇩' },
-                    { id: 'sw', name: 'Swahili', flag: '🇨🇩' },
-                    { id: 'lu', name: 'Tshiluba', flag: '🇨🇩' },
-                    { id: 'kg', name: 'Kikongo', flag: '🇨🇩' }
-                  ].map((lang) => (
-                    <button
-                      key={lang.id}
-                      onClick={() => setLanguage(lang.id as any)}
-                      className={`flex items-center gap-2 p-2 rounded-xl border transition-all text-left text-xs ${
-                        language === lang.id
-                          ? "border-amber-500 bg-amber-500/10 text-white font-bold"
-                          : "border-white/5 bg-zinc-950/40 text-zinc-400 hover:border-white/10"
-                      }`}
-                    >
-                      <span className="text-sm">{lang.flag}</span>
-                      <div className="min-w-0">
-                        <p className="font-bold leading-tight truncate text-[11px]">{lang.name}</p>
-                        <p className="text-[8px] text-zinc-500 font-mono uppercase">{lang.id}</p>
-                      </div>
-                    </button>
-                  ))}
+                <div className="relative">
+                  <select
+                    value={language}
+                    onChange={(e) => setLanguage(e.target.value as any)}
+                    className="w-full bg-zinc-950/80 border border-white/10 text-white rounded-xl p-3 text-xs focus:ring-1 focus:ring-amber-500 focus:outline-none font-sans font-medium appearance-none"
+                  >
+                    <option value="fr" className="bg-zinc-900 text-white">Français</option>
+                    <option value="en" className="bg-zinc-900 text-white">English</option>
+                    <option value="sw" className="bg-zinc-900 text-white">Swahili</option>
+                    <option value="lu" className="bg-zinc-900 text-white">Tshiluba</option>
+                    <option value="kg" className="bg-zinc-900 text-white">Kikongo</option>
+                    <option value="ln" className="bg-zinc-900 text-white">Lingala</option>
+                  </select>
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-zinc-400">
+                    <span className="text-[9px]">▼</span>
+                  </div>
                 </div>
               </div>
 
-              {/* Theme Configuration */}
-              <div className="space-y-2.5">
+              {/* Theme Configuration - Dropdown List */}
+              <div className="space-y-2">
                 <label className="text-[10px] font-mono text-amber-400 uppercase tracking-widest block flex items-center gap-1.5 font-bold">
-                  <Palette className="w-3.5 h-3.5" />
+                  <Palette className="w-3.5 h-3.5 text-purple-400" />
                   {dict.themeSelect}
                 </label>
-                <div className="grid grid-cols-2 gap-2">
-                  {THEMES.map((theme) => (
-                    <button
-                      key={theme.id}
-                      onClick={() => setActiveTheme(theme)}
-                      className={`flex items-center justify-between p-2.5 rounded-xl border transition-all text-xs ${
-                        activeTheme.id === theme.id
-                          ? "border-amber-500 bg-amber-500/10 text-white font-bold"
-                          : "border-white/5 bg-zinc-950/40 text-zinc-400 hover:border-white/10"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <span style={{ backgroundColor: theme.glowColor }} className="w-3 h-3 rounded-full block border border-white/10" />
-                        <span className="text-[11px]">{theme.name}</span>
-                      </div>
-                      {activeTheme.id === theme.id && <Check className="w-3.5 h-3.5 text-amber-500" />}
-                    </button>
-                  ))}
+                <div className="relative">
+                  <select
+                    value={activeTheme.id}
+                    onChange={(e) => {
+                      const found = THEMES.find(t => t.id === e.target.value);
+                      if (found) setActiveTheme(found);
+                    }}
+                    className="w-full bg-zinc-950/80 border border-white/10 text-white rounded-xl p-3 text-xs focus:ring-1 focus:ring-amber-500 focus:outline-none font-sans font-medium appearance-none"
+                  >
+                    {THEMES.map((theme) => (
+                      <option key={theme.id} value={theme.id} className="bg-zinc-900 text-white">
+                        {theme.name.replace(/🌳|🟢|🏺|⚡|🍊|🔲|🌊|❄️/g, "").trim()}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-zinc-400">
+                    <span className="text-[9px]">▼</span>
+                  </div>
                 </div>
               </div>
 
-              {/* Font typography select */}
-              <div className="space-y-2.5">
+              {/* Font typography select - Dropdown List */}
+              <div className="space-y-2">
                 <label className="text-[10px] font-mono text-amber-400 uppercase tracking-widest block flex items-center gap-1.5 font-bold">
-                  <Type className="w-3.5 h-3.5" />
+                  <Type className="w-3.5 h-3.5 text-emerald-400" />
                   {dict.fontSelect}
                 </label>
-                <div className="grid grid-cols-2 gap-2">
-                  {FONTS.map((font) => (
-                    <button
-                      key={font.id}
-                      onClick={() => setActiveFont(font)}
-                      className={`flex items-center justify-between p-2.5 rounded-xl border transition-all text-xs ${
-                        activeFont.id === font.id
-                          ? "border-amber-500 bg-amber-500/10 text-white font-bold"
-                          : "border-white/5 bg-zinc-950/40 text-zinc-400 hover:border-white/10"
-                      }`}
-                      style={{ fontFamily: font.fontFamily }}
-                    >
-                      <span className="text-[11px]">{font.name}</span>
-                      {activeFont.id === font.id && <Check className="w-3.5 h-3.5 text-amber-500" />}
-                    </button>
-                  ))}
+                <div className="relative">
+                  <select
+                    value={activeFont.id}
+                    onChange={(e) => {
+                      const found = FONTS.find(f => f.id === e.target.value);
+                      if (found) setActiveFont(found);
+                    }}
+                    className="w-full bg-zinc-950/80 border border-white/10 text-white rounded-xl p-3 text-xs focus:ring-1 focus:ring-amber-500 focus:outline-none font-sans font-medium appearance-none"
+                    style={{ fontFamily: activeFont.fontFamily }}
+                  >
+                    {FONTS.map((font) => (
+                      <option key={font.id} value={font.id} className="bg-zinc-900 text-white" style={{ fontFamily: font.fontFamily }}>
+                        {font.name.replace(/⚡|🏺|🟢|🌸|🇨🇭|🍒/g, "").trim()}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-zinc-400">
+                    <span className="text-[9px]">▼</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* System Permissions and Security Access Button */}
+              <div className="pt-2 border-t border-white/5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsParamsOpen(false);
+                    setShowPermissionsModal(true);
+                  }}
+                  className="w-full flex items-center justify-between p-3 bg-zinc-950/90 hover:bg-zinc-900 border border-white/10 rounded-xl text-zinc-300 hover:text-white transition-all text-xs font-mono group"
+                >
+                  <span className="flex items-center gap-2">
+                    <ShieldCheck className="w-4 h-4 text-emerald-400 group-hover:scale-105 transition-transform" />
+                    🔒 Gérer mes Autorisations & KYC
+                  </span>
+                  <span className="text-[10px] text-amber-500 font-extrabold tracking-wider uppercase">Gérer &gt;</span>
+                </button>
+              </div>
+
+              {/* Espacement et Section Espace Marchand / Become Vendor */}
+              <div className="pt-4 border-t border-white/5 space-y-3">
+                <div className="bg-zinc-950/80 p-3.5 rounded-2xl border border-orange-500/10 space-y-2">
+                  <div className="flex items-center gap-1.5 text-[10px] font-mono text-[#FF8C00] font-bold uppercase tracking-wider">
+                    <Sparkles className="w-3.5 h-3.5 text-orange-400 animate-pulse" />
+                    ESPACE MARCHAND • PRO HUB
+                  </div>
+                  <p className="text-[10px] text-zinc-400 leading-normal font-sans">
+                    {{
+                      fr: "Devenez vendeur certifié sur Kufulula Soko! Créez votre boutique moderne, configurez vos paiements et vendez en toute sécurité.",
+                      en: "Become a certified vendor on Kufulula Soko! Create your modern shop, set up payouts and sell securely.",
+                      sw: "Kuwa muuzaji aliyeidhinishwa kwenye Kufulula Soko! Fungua duka lako, weka njia za malipo na uuze kwa salama.",
+                      ln: "Koma motekisi ya sembo na Kufulula Soko! Fungola wenze na yo, zua mbongo na yo mpe tekisa na bolingi.",
+                      lu: "Shala nshandishi ku Kufulula Soko! Bulula tshitenda tshiebe, dipatula de maseke onsu.",
+                      kg: "Kala nkotisi ya kieleka na Kufulula Soko! Kanga wenzo ya mbote mpe kotisa kisalu ya bosembo."
+                    }[language] || "Devenez vendeur certifié sur Kufulula Soko! Créez votre boutique moderne, configurez vos paiements et vendez en toute sécurité."}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsParamsOpen(false);
+                      setShowMerchantPortal(true);
+                    }}
+                    className="w-full py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-zinc-950 font-mono text-[11px] font-black uppercase tracking-widest rounded-xl transition-all shadow-md active:scale-95 flex items-center justify-center gap-1.5"
+                  >
+                    <Building2 className="w-3.5 h-3.5" />
+                    {{
+                      fr: "Devenir Marchand 🚀",
+                      en: "Become Vendor 🚀",
+                      sw: "Kuwa Muuzaji 🚀",
+                      ln: "Koma Motekisi 🚀",
+                      lu: "Shala Nshandishi 🚀",
+                      kg: "Kala Ntekisi 🚀"
+                    }[language] || "Devenir Marchand 🚀"}
+                  </button>
                 </div>
               </div>
 
@@ -1160,7 +2422,7 @@ export default function App() {
               <div className="flex gap-2.5 pt-2 border-t border-white/5">
                 <button
                   onClick={() => setIsParamsOpen(false)}
-                  className="flex-1 py-3 bg-[#FF8C00] hover:bg-amber-500 text-zinc-950 font-mono text-xs font-black tracking-wider uppercase rounded-xl transition-all shadow-md active:scale-95"
+                  className="flex-1 py-3 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-mono text-xs font-black tracking-wider uppercase rounded-xl transition-all shadow-md active:scale-95"
                 >
                   Appliquer & Fermer
                 </button>
@@ -1173,6 +2435,235 @@ export default function App() {
               </div>
             </motion.div>
           </div>
+        )}
+      </AnimatePresence>
+
+      {/* SYSTEM ACCESS & SECURITY KYC PORTAL OVERLAY */}
+      <AnimatePresence>
+        {showPermissionsModal && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowPermissionsModal(false)}
+              className="absolute inset-0 bg-black/90 backdrop-blur-lg"
+            />
+
+            <motion.div
+              initial={{ scale: 0.95, y: 30, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              exit={{ scale: 0.95, y: 30, opacity: 0 }}
+              className="relative bg-zinc-950/95 border border-amber-500/20 text-white p-6 rounded-3xl max-w-md w-full shadow-2xl z-10 space-y-4 max-h-[92vh] overflow-y-auto"
+            >
+              <div className="text-center space-y-1.5 pb-3 border-b border-white/10">
+                <div className="w-12 h-12 bg-amber-500/15 rounded-2xl flex items-center justify-center text-amber-500 mx-auto border border-amber-500/20 shadow-[0_0_15px_rgba(245,158,11,0.1)]">
+                  <ShieldCheck className="w-6 h-6" />
+                </div>
+                <div>
+                  <span className="text-[10px] font-mono tracking-widest text-amber-500 uppercase font-black">Sécurité & Accès</span>
+                  <h3 className="text-sm font-sans font-extrabold uppercase text-zinc-100 flex items-center justify-center gap-2">
+                    🔑 AUTORISATIONS SYSTEME & KYC
+                  </h3>
+                </div>
+                <p className="text-[11px] text-zinc-400 max-w-xs mx-auto leading-relaxed">
+                  Autorisez de manière persistante les modules matériels de KUFULULA.cd pour ce navigateur afin d can commercer l'esprit tranquille.
+                </p>
+              </div>
+
+              {/* Scrollable list of permissions checkboxes/toggles */}
+              <div className="space-y-2 max-h-[48vh] overflow-y-auto pr-1">
+                {/* 1. Camera */}
+                <div className="flex items-center justify-between p-3 bg-zinc-900/60 border border-white/5 rounded-2xl hover:border-white/10 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-amber-500/10 text-amber-500 rounded-xl">
+                      <Camera className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-white">Caméra Physique</p>
+                      <p className="text-[10px] text-zinc-500 leading-snug">Scans de Codes QR & KYC Face instantané</p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleTogglePermission('camera')}
+                    className={`w-10 h-5.5 rounded-full p-0.5 transition-colors duration-200 ${permissionsState.camera ? 'bg-amber-500' : 'bg-zinc-800'}`}
+                  >
+                    <div className={`w-4.5 h-4.5 rounded-full bg-white shadow-sm transition-transform duration-200 ${permissionsState.camera ? 'translate-x-4.5' : 'translate-x-0'}`} />
+                  </button>
+                </div>
+
+                {/* 2. Microphone */}
+                <div className="flex items-center justify-between p-3 bg-zinc-900/60 border border-white/5 rounded-2xl hover:border-white/10 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-purple-500/10 text-purple-400 rounded-xl">
+                      <Mic className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-white">Microphone (Audio)</p>
+                      <p className="text-[10px] text-zinc-500 leading-snug">Filtres vocaux & marchand intelligent</p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleTogglePermission('microphone')}
+                    className={`w-10 h-5.5 rounded-full p-0.5 transition-colors duration-200 ${permissionsState.microphone ? 'bg-amber-500' : 'bg-zinc-800'}`}
+                  >
+                    <div className={`w-4.5 h-4.5 rounded-full bg-white shadow-sm transition-transform duration-200 ${permissionsState.microphone ? 'translate-x-4.5' : 'translate-x-0'}`} />
+                  </button>
+                </div>
+
+                {/* 3. Geo-localisation */}
+                <div className="flex items-center justify-between p-3 bg-zinc-900/60 border border-white/5 rounded-2xl hover:border-white/10 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-cyan-500/10 text-cyan-400 rounded-xl">
+                      <MapPin className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-white">Géo-localisation</p>
+                      <p className="text-[10px] text-zinc-500 leading-snug">Calcul de frais Mobile Money & points relais</p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleTogglePermission('geolocation')}
+                    className={`w-10 h-5.5 rounded-full p-0.5 transition-colors duration-200 ${permissionsState.geolocation ? 'bg-amber-500' : 'bg-zinc-800'}`}
+                  >
+                    <div className={`w-4.5 h-4.5 rounded-full bg-white shadow-sm transition-transform duration-200 ${permissionsState.geolocation ? 'translate-x-4.5' : 'translate-x-0'}`} />
+                  </button>
+                </div>
+
+                {/* 4. Notification */}
+                <div className="flex items-center justify-between p-3 bg-zinc-900/60 border border-white/5 rounded-2xl hover:border-white/10 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-emerald-500/10 text-emerald-400 rounded-xl">
+                      <Bell className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-white">Notifications Système</p>
+                      <p className="text-[10px] text-zinc-500 leading-snug">Alertes de livraison, séquestre & offres</p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleTogglePermission('notifications')}
+                    className={`w-10 h-5.5 rounded-full p-0.5 transition-colors duration-200 ${permissionsState.notifications ? 'bg-amber-500' : 'bg-zinc-800'}`}
+                  >
+                    <div className={`w-4.5 h-4.5 rounded-full bg-white shadow-sm transition-transform duration-200 ${permissionsState.notifications ? 'translate-x-4.5' : 'translate-x-0'}`} />
+                  </button>
+                </div>
+
+                {/* 5. Auto installation */}
+                <div className="flex items-center justify-between p-3 bg-zinc-900/60 border border-white/5 rounded-2xl hover:border-white/10 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-pink-500/10 text-pink-400 rounded-xl">
+                      <Download className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-white">Auto-Installation</p>
+                      <p className="text-[10px] text-zinc-500 leading-snug">Raccourci PWA & exécution ultra-rapide</p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleTogglePermission('autoinstall')}
+                    className={`w-10 h-5.5 rounded-full p-0.5 transition-colors duration-200 ${permissionsState.autoinstall ? 'bg-amber-500' : 'bg-zinc-800'}`}
+                  >
+                    <div className={`w-4.5 h-4.5 rounded-full bg-white shadow-sm transition-transform duration-200 ${permissionsState.autoinstall ? 'translate-x-4.5' : 'translate-x-0'}`} />
+                  </button>
+                </div>
+
+                {/* 6. KYC Security */}
+                <div className="flex items-center justify-between p-3 bg-zinc-900/60 border border-white/5 rounded-2xl hover:border-white/10 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-rose-500/10 text-rose-400 rounded-xl">
+                      <ShieldCheck className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-white">Sécurité & KYC Civil</p>
+                      <p className="text-[10px] text-zinc-500 leading-snug">Escrow biométrique anti-fraude d'identité</p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleTogglePermission('kyc')}
+                    className={`w-10 h-5.5 rounded-full p-0.5 transition-colors duration-200 ${permissionsState.kyc ? 'bg-amber-500' : 'bg-zinc-800'}`}
+                  >
+                    <div className={`w-4.5 h-4.5 rounded-full bg-white shadow-sm transition-transform duration-200 ${permissionsState.kyc ? 'translate-x-4.5' : 'translate-x-0'}`} />
+                  </button>
+                </div>
+
+                {/* 7. Media apps */}
+                <div className="flex items-center justify-between p-3 bg-zinc-900/60 border border-white/5 rounded-2xl hover:border-white/10 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-indigo-500/10 text-indigo-400 rounded-xl">
+                      <Music className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-white">Applications Médias</p>
+                      <p className="text-[10px] text-zinc-500 leading-snug">Lecteurs audio & flux culturels congolais</p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleTogglePermission('media')}
+                    className={`w-10 h-5.5 rounded-full p-0.5 transition-colors duration-200 ${permissionsState.media ? 'bg-amber-500' : 'bg-zinc-800'}`}
+                  >
+                    <div className={`w-4.5 h-4.5 rounded-full bg-white shadow-sm transition-transform duration-200 ${permissionsState.media ? 'translate-x-4.5' : 'translate-x-0'}`} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Dual Actions Footer Block */}
+              <div className="flex flex-col gap-2 pt-3 border-t border-white/10">
+                <button
+                  type="button"
+                  onClick={() => handleSaveAllPermissions(true)}
+                  className="w-full py-3 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-mono text-xs font-black tracking-wider uppercase rounded-xl transition-all shadow-md active:scale-95 flex items-center justify-center gap-2"
+                >
+                  <ShieldCheck className="w-4 h-4" />
+                  Tout Activer & Commencer
+                </button>
+                
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handleSaveAllPermissions(false)}
+                    className="flex-1 py-2.5 bg-zinc-900 hover:bg-zinc-850 rounded-xl text-zinc-300 hover:text-white text-xs font-mono border border-white/5 whitespace-nowrap active:scale-95"
+                  >
+                    Enregistrer la Sélection
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowPermissionsModal(false)}
+                    className="px-4 py-2.5 bg-zinc-950 hover:bg-zinc-900 text-zinc-500 hover:text-zinc-400 text-xs font-mono rounded-xl border border-white/5 active:scale-95"
+                  >
+                    Fermer
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* MERCHAND VENDOR ONBOARDING PORTAL (Alibaba Design & 10 Certified Steps) */}
+      <AnimatePresence>
+        {showMerchantPortal && (
+          <MerchantVendorPortal
+            currentUser={adminUser}
+            lang={language}
+            onClose={() => setShowMerchantPortal(false)}
+            onSuccess={(newProduct) => {
+              setShowMerchantPortal(false);
+              loadCatalog();
+              loadSessionAuth();
+              if (newProduct) {
+                setAllProducts(prev => [newProduct, ...prev]);
+                setFilteredProducts(prev => [newProduct, ...prev]);
+              }
+            }}
+          />
         )}
       </AnimatePresence>
 
@@ -1221,24 +2712,24 @@ export default function App() {
                   <p className="text-xs text-zinc-500 italic">Dis quelque chose... comme "mwinda solaire", "café de kasai", "livret d'historie"</p>
                   
                   {/* Congo simulated vocal recommendations clickables to mimic real input */}
-                  <div className="flex flex-col gap-1 text-[11px] font-mono text-center pt-2">
+                  <div className="flex flex-col gap-1.5 text-[11px] font-mono text-center pt-2">
                     <button
                       onClick={() => handleSelectSimulatedVoiceQuery("mwinda solar")}
-                      className="px-3 py-2 rounded bg-zinc-950 border border-white/5 text-amber-400 hover:border-amber-500 transition"
+                      className="px-3 py-2 rounded bg-zinc-950 border border-white/5 text-amber-400 hover:border-amber-500 transition flex items-center justify-center gap-2"
                     >
-                      🗣️ "Mwinda Solaire"
+                      <Mic className="w-3.5 h-3.5 text-amber-500" /> "Mwinda Solaire"
                     </button>
                     <button
                       onClick={() => handleSelectSimulatedVoiceQuery("Coffee Reserve")}
-                      className="px-3 py-2 rounded bg-zinc-950 border border-white/5 text-amber-400 hover:border-amber-500 transition"
+                      className="px-3 py-2 rounded bg-zinc-950 border border-white/5 text-amber-400 hover:border-amber-500 transition flex items-center justify-center gap-2"
                     >
-                      🗣️ "Café de Kasai"
+                      <Mic className="w-3.5 h-3.5 text-amber-500" /> "Café de Kasai"
                     </button>
                     <button
                       onClick={() => handleSelectSimulatedVoiceQuery("Légende Kongo")}
-                      className="px-3 py-2 rounded bg-zinc-950 border border-white/5 text-amber-400 hover:border-amber-500 transition"
+                      className="px-3 py-2 rounded bg-zinc-950 border border-white/5 text-amber-400 hover:border-amber-500 transition flex items-center justify-center gap-2"
                     >
-                      🗣️ "Livre Dynastie Kongo"
+                      <Mic className="w-3.5 h-3.5 text-amber-500" /> "Livre Dynastie Kongo"
                     </button>
                   </div>
                 </div>
@@ -1261,6 +2752,261 @@ export default function App() {
               >
                 Annuler
               </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* AI GOOGLE LENS MOUNT & HANDLERS MODAL */}
+      <AnimatePresence>
+        {showAiLensModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div 
+              onClick={handleCloseAiLens}
+              className="absolute inset-0 bg-black/90 backdrop-blur-md" 
+            />
+            
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              className="relative bg-zinc-900 border border-zinc-800 rounded-3xl p-6 max-w-3xl w-full text-white z-10 shadow-2xl space-y-4 overflow-y-auto max-h-[90vh]"
+            >
+              {/* Modal Header */}
+              <div className="flex justify-between items-center pb-2 border-b border-white/5">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-cyan-400 animate-pulse" />
+                  <h3 className="text-xs font-mono uppercase tracking-widest text-cyan-400 font-bold">
+                    KUFULULA GOOGLE LENS AI
+                  </h3>
+                </div>
+                <button 
+                  onClick={handleCloseAiLens}
+                  className="text-zinc-550 hover:text-white text-sm"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Status Information */}
+              <p className="text-[11.5px] text-zinc-400 leading-normal">
+                Prenez une photo en direct, importez un fichier image, ou utilisez l'un des presets de démonstration ci-dessous pour lancer une analyse visuelle intelligente via <strong className="text-cyan-400">Gemini AI / Google Lens</strong> et rechercher automatiquement un produit correspondant au catalogue !
+              </p>
+
+              {aiLensError && (
+                <div className="p-3 rounded-xl bg-red-950/40 border border-red-500/20 text-xs text-red-400 flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-red-400 shrink-0" />
+                  <span>{aiLensError}</span>
+                </div>
+              )}
+
+              {/* MAIN RECTANGLE VIEWS */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                
+                {/* STAGE A: Camera / Capture Frame */}
+                <div className="bg-zinc-950 border border-white/5 rounded-2xl overflow-hidden aspect-video relative flex flex-col justify-between p-3">
+                  
+                  {/* Floating corners decorative frame */}
+                  <div className="absolute top-3 left-3 w-5 h-5 border-t-2 border-l-2 border-cyan-400" />
+                  <div className="absolute top-3 right-3 w-5 h-5 border-t-2 border-r-2 border-cyan-400" />
+                  <div className="absolute bottom-3 left-3 w-5 h-5 border-b-2 border-l-2 border-cyan-400" />
+                  <div className="absolute bottom-3 right-3 w-5 h-5 border-b-2 border-r-2 border-cyan-400" />
+
+                  {/* Rendering Content (Live camera, upload snapshot or scan matching results) */}
+                  {aiLensScanStatus === 'scanning' ? (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center space-y-3 z-20 bg-zinc-950/80 animate-fade-in">
+                      <div className="w-10 h-10 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin" />
+                      <p className="text-[10px] font-mono tracking-widest uppercase text-cyan-400 animate-pulse">
+                        ANALYSE EN COURS PAR GEMINI AI...
+                      </p>
+                      {/* Laser sweep animation line */}
+                      <div className="absolute left-0 w-full h-1 bg-cyan-400/50 blur-[3px] animate-bounce top-1/2" />
+                    </div>
+                  ) : null}
+
+                  {aiLensCapturedImage ? (
+                    <img 
+                      src={aiLensCapturedImage} 
+                      alt="Captured Preview" 
+                      className="absolute inset-0 h-full w-full object-cover"
+                    />
+                  ) : aiCameraStream ? (
+                    <video 
+                      ref={aiVideoRef}
+                      autoPlay 
+                      playsInline 
+                      muted
+                      className="absolute inset-0 h-full w-full object-cover filter brightness-105"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center text-zinc-600 text-xs">
+                      <Camera className="w-12 h-12 stroke-[1] mb-2 text-zinc-800 animate-bounce" />
+                      Caméra inactive ou permission restreinte.
+                    </div>
+                  )}
+
+                  {/* Controls on camera stage */}
+                  <div className="relative z-10 mt-auto flex justify-between w-full">
+                    {aiCameraStream && !aiLensCapturedImage ? (
+                      <button
+                        type="button"
+                        onClick={handleCaptureAiPhoto}
+                        className="px-3 py-1.5 bg-cyan-400 hover:bg-cyan-500 text-zinc-950 text-[10px] font-mono font-black uppercase rounded-lg shadow transition-all active:scale-95 flex items-center gap-1.5"
+                      >
+                        Capture d'écran <Camera className="w-3.5 h-3.5" />
+                      </button>
+                    ) : null}
+                    
+                    {aiLensCapturedImage ? (
+                      <button
+                        type="button"
+                        onClick={() => setAiLensCapturedImage(null)}
+                        className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-[10px] font-mono font-black uppercase rounded-lg shadow transition-all active:scale-95 ml-auto"
+                      >
+                        Annuler la photo x
+                      </button>
+                    ) : null}
+                  </div>
+                </div>
+
+                {/* STAGE B: Visual Matching Result / Action */}
+                <div className="bg-zinc-950/40 border border-white/5 rounded-2xl p-4 flex flex-col justify-between space-y-3 relative">
+                  
+                  {/* Results Display */}
+                  {aiLensScanStatus === 'matched' && aiLensResult ? (
+                    <motion.div 
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="space-y-3 text-center md:text-left h-full flex flex-col justify-center"
+                    >
+                      <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-[10px] font-mono font-extrabold uppercase tracking-wider mx-auto md:mx-0">
+                        <Check className="w-3.5 h-3.5 animate-bounce" />
+                        IDENTIFICATION RECONNUE • CIBLÉ !
+                      </div>
+
+                      <div className="space-y-1">
+                        <h4 className="text-sm font-black text-white hover:text-cyan-400 font-sans tracking-tight leading-snug">
+                          {aiLensResult.primaryObject}
+                        </h4>
+                        <div className="flex flex-wrap gap-1.5 justify-center md:justify-start pt-1.5">
+                          <span className="text-[9px] font-mono bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-2 py-0.5 rounded-md uppercase font-bold">
+                            Catégorie : {aiLensResult.detectedCategory}
+                          </span>
+                          <span className="text-[9px] font-mono bg-white/5 text-zinc-400 border border-white/5 px-2 py-0.5 rounded-md font-bold">
+                            Précision : {aiLensResult.confidenceScore}%
+                          </span>
+                        </div>
+                      </div>
+
+                      <p className="text-[11.5px] text-zinc-400 leading-relaxed italic border-l-2 border-cyan-400/50 pl-3 pt-1">
+                        "{aiLensResult.description}"
+                      </p>
+
+                      <div className="pt-2 text-center text-[10px] font-mono text-zinc-550 animate-pulse uppercase tracking-wider">
+                        Filtrage du catalogue actif ... redirection en cours !
+                      </div>
+                    </motion.div>
+                  ) : (
+                    <div className="h-full flex flex-col justify-center space-y-3">
+                      <div>
+                        <span className="text-[9px] text-zinc-550 font-mono font-bold block uppercase tracking-widest leading-none">ÉTAPE ACTIVE</span>
+                        <h4 className="text-xs font-mono font-bold text-zinc-350 pt-0.5">Soumettre la photo à l'I.A.</h4>
+                      </div>
+                      
+                      <p className="text-[11px] text-zinc-400 leading-relaxed">
+                        Une fois que vous avez enregistré une capture d'écran, importé un fichier image de votre appareil, ou sélectionné l'un de nos presets ci-dessous, lancez la recherche intelligente en un clic !
+                      </p>
+
+                      {selectedLensPreset && (
+                        <div className="p-3 bg-cyan-950/20 border border-cyan-500/20 rounded-xl space-y-1 flex items-center gap-3">
+                          <img 
+                            src={LENS_PHOTO_PRESETS.find(p => p.id === selectedLensPreset)?.image}
+                            alt="Preset preview"
+                            className="w-10 h-10 object-cover rounded-lg border border-white/10"
+                          />
+                          <div>
+                            <span className="text-[9px] font-mono text-cyan-400 uppercase font-black tracking-wider block">PRESET ASSIGNÉ</span>
+                            <span className="text-xs text-white font-extrabold">{LENS_PHOTO_PRESETS.find(p => p.id === selectedLensPreset)?.name}</span>
+                          </div>
+                        </div>
+                      )}
+
+                      <button
+                        type="button"
+                        disabled={(!aiLensCapturedImage && !selectedLensPreset) || aiLensScanStatus === 'scanning'}
+                        onClick={handleTriggerAiLensSearch}
+                        className="w-full py-3 px-4 bg-cyan-400 hover:bg-cyan-500 text-zinc-950 rounded-xl font-mono text-xs font-black tracking-wider uppercase transition-all disabled:opacity-20 flex items-center justify-center gap-2 shadow-md shadow-cyan-400/10 active:scale-95"
+                      >
+                        <Sparkles className="w-4 h-4 fill-zinc-950 text-zinc-950 animate-pulse" />
+                        Lancer l'Analyse Visuelle (Lens)
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* DEMO PHOTO SAMPLES RAIL */}
+              <div className="space-y-2 pt-2 border-t border-white/5">
+                <span className="text-[10px] text-zinc-500 font-mono tracking-widest uppercase block font-bold text-center md:text-left">
+                  🌟 EXEMPLES DE PRISES DE VUE (SANS BESOIN DE CAMÉRA PHYSIQUE)
+                </span>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                  {LENS_PHOTO_PRESETS.map((p) => (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => {
+                        setSelectedLensPreset(p.id);
+                        setAiLensCapturedImage(null);
+                        setAiLensError(null);
+                      }}
+                      className={`relative flex flex-col items-stretch text-left rounded-xl p-2 bg-zinc-950/50 border transition-all hover:bg-zinc-950/85 ${
+                        selectedLensPreset === p.id 
+                          ? "border-cyan-400 ring-1 ring-cyan-400 bg-zinc-950" 
+                          : "border-white/5"
+                      }`}
+                    >
+                      <div className="aspect-[4/3] w-full rounded-lg overflow-hidden bg-black mb-1.5 relative">
+                        <img 
+                          src={p.image} 
+                          alt={p.name}
+                          className="w-full h-full object-cover"
+                          referrerPolicy="no-referrer"
+                        />
+                        <span className="absolute bottom-1 right-1 px-1 bg-black/80 border border-white/10 text-[7px] font-mono text-zinc-400 rounded-sm">
+                          {p.category}
+                        </span>
+                      </div>
+                      <div className="space-y-0.5 leading-none">
+                        <span className="text-[10px] font-black text-zinc-200 line-clamp-1 block">{p.name}</span>
+                        <span className="text-[8px] font-mono text-zinc-500 line-clamp-1 block">{p.description}</span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* FOOTER ACTIONS */}
+              <div className="flex gap-3 justify-end pt-2 border-t border-white/5 text-xs font-mono">
+                {/* File Upload Trigger */}
+                <label className="px-4 py-2.5 bg-[#FF8C00]/10 border border-[#FF8C00]/30 hover:bg-[#FF8C00] hover:text-zinc-950 text-[#FF8C00] rounded-xl text-center font-bold cursor-pointer transition-all flex items-center justify-center gap-1.5 active:scale-95">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAiLensFileUpload}
+                    className="hidden"
+                  />
+                  <span>📁 Charger un fichier</span>
+                </label>
+
+                <button
+                  type="button"
+                  onClick={handleCloseAiLens}
+                  className="px-5 py-2.5 bg-zinc-200 hover:bg-zinc-300 text-zinc-950 font-bold rounded-xl transition-colors"
+                >
+                  Fermer
+                </button>
+              </div>
             </motion.div>
           </div>
         )}
@@ -1301,24 +3047,24 @@ export default function App() {
                 <button
                   type="button"
                   onClick={() => setQrTab('scan')}
-                  className={`py-2 rounded-lg font-bold transition-all ${
+                  className={`py-2 rounded-lg font-bold transition-all flex items-center justify-center gap-1.5 ${
                     qrTab === 'scan' 
                       ? "bg-[#FF8C00] text-zinc-950 shadow-md animate-pulse" 
                       : "text-zinc-400 hover:text-white"
                   }`}
                 >
-                  🔍 Scanneur QR Code
+                  Scanneur QR Code
                 </button>
                 <button
                   type="button"
                   onClick={() => setQrTab('create')}
-                  className={`py-2 rounded-lg font-bold transition-all ${
+                  className={`py-2 rounded-lg font-bold transition-all flex items-center justify-center gap-1.5 ${
                     qrTab === 'create' 
                       ? "bg-[#FF8C00] text-zinc-950 shadow-md" 
                       : "text-zinc-400 hover:text-white"
                   }`}
                 >
-                  ✨ Créateur QR Code
+                  Créateur QR Code
                 </button>
               </div>
 
@@ -1524,23 +3270,23 @@ export default function App() {
                         <button
                           type="button"
                           onClick={() => setQrCreatorText("product:prod-mwinda-solar")}
-                          className="px-2.5 py-1.5 bg-zinc-950 hover:bg-zinc-800 border border-white/5 text-amber-500 rounded-lg hover:border-amber-400"
+                          className="px-2.5 py-1.5 bg-zinc-950 hover:bg-zinc-800 border border-white/5 text-amber-500 rounded-lg hover:border-amber-400 flex items-center gap-1.5"
                         >
-                          🔦 QR Énergie MOTO Solaire
+                          <Flame className="w-3.5 h-3.5" /> QR Énergie MOTO Solaire
                         </button>
                         <button
                           type="button"
                           onClick={() => setQrCreatorText("coupon:KUFULULA20")}
-                          className="px-2.5 py-1.5 bg-zinc-950 hover:bg-zinc-800 border border-white/5 text-[#FF8C00] rounded-lg hover:border-[#FF8C00]"
+                          className="px-2.5 py-1.5 bg-zinc-950 hover:bg-zinc-800 border border-white/5 text-[#FF8C00] rounded-lg hover:border-[#FF8C00] flex items-center gap-1.5"
                         >
-                          🎟️ QR Coupon Réduction -20$
+                          <Ticket className="w-3.5 h-3.5" /> QR Coupon Réduction -20$
                         </button>
                         <button
                           type="button"
                           onClick={() => setQrCreatorText("action:support-chat")}
-                          className="px-2.5 py-1.5 bg-zinc-950 hover:bg-zinc-800 border border-white/5 text-green-400 rounded-lg hover:border-green-400"
+                          className="px-2.5 py-1.5 bg-zinc-950 hover:bg-zinc-800 border border-white/5 text-green-400 rounded-lg hover:border-green-400 flex items-center gap-1.5"
                         >
-                          💬 QR Assistant Discussion
+                          <MessageSquare className="w-3.5 h-3.5" /> QR Assistant Discussion
                         </button>
                       </div>
                     </div>
@@ -1675,16 +3421,30 @@ export default function App() {
       </AnimatePresence>
 
       {/* RESPONSIVE BOTTOM MOBILE FLOATING NAVIGATION DOCK (Glassmorphism & Center Raised Action button) */}
-      <div className="fixed bottom-0 inset-x-0 z-40 bg-zinc-950/20 pointer-events-none pb-2">
+      <div className="fixed bottom-0 inset-x-0 z-40 bg-zinc-950/10 pointer-events-none pb-2">
         <div className="max-w-md mx-auto px-4 pointer-events-auto">
-          <div className="bg-zinc-950/80 border border-white/10 backdrop-blur-md rounded-2xl h-16 flex items-center justify-around px-4 shadow-2xl relative">
+          <div className={`transition-all duration-300 rounded-2xl h-16 flex items-center justify-around px-4 shadow-2xl relative ${
+            activeTheme.id === 'sahel-noir'
+              ? 'bg-zinc-950/90 border border-emerald-500/40 text-white'
+              : activeTheme.id === 'terracotta-clay'
+              ? 'bg-white/95 border border-[#E8DFD0] text-[#4E2A25]'
+              : activeTheme.id === 'urban-brutalist'
+              ? 'bg-white border-2 border-black text-black'
+              : activeTheme.id === 'abysses'
+              ? 'bg-[#021424]/95 border border-cyan-500/35 text-white shadow-[0_0_20px_rgba(34,211,238,0.15)] backdrop-blur-md'
+              : activeTheme.id === 'glass-water'
+              ? 'backdrop-blur-md bg-white/40 border border-white/60 text-zinc-800 shadow-lg'
+              : 'bg-zinc-950/80 border border-white/10 backdrop-blur-md text-white'
+          }`}>
             
             {/* Dock Item 1: Accueil */}
             <button
                id="nav-btn-home"
               onClick={() => setViewMode('shop')}
               className={`flex flex-col items-center gap-1 transition-all select-none ${
-                viewMode === 'shop' ? "text-[#FF8C00] scale-105 font-bold" : "text-zinc-500 hover:text-white"
+                viewMode === 'shop' 
+                  ? (activeTheme.id === 'abysses' ? "text-cyan-400 scale-105 font-bold" : activeTheme.id === 'glass-water' ? "text-slate-800 scale-105 font-bold" : "text-[#FF8C00] scale-105 font-bold") 
+                  : "text-zinc-500 hover:text-white"
               }`}
             >
               <Compass className="w-5 h-5" />
@@ -1696,7 +3456,9 @@ export default function App() {
                id="nav-btn-favorites"
               onClick={() => setViewMode('favorites')}
               className={`flex flex-col items-center gap-1 transition-all select-none ${
-                viewMode === 'favorites' ? "text-[#FF8C00] scale-105 font-bold" : "text-zinc-500 hover:text-white"
+                viewMode === 'favorites' 
+                  ? (activeTheme.id === 'abysses' ? "text-cyan-400 scale-105 font-bold" : activeTheme.id === 'glass-water' ? "text-slate-800 scale-105 font-bold" : "text-[#FF8C00] scale-105 font-bold") 
+                  : "text-zinc-500 hover:text-white"
               }`}
             >
               <Heart className="w-5 h-5 animate-pulse" />
@@ -1708,7 +3470,9 @@ export default function App() {
                id="nav-btn-chat"
               onClick={() => setViewMode('chat')}
               className={`flex flex-col items-center gap-1 transition-all select-none ${
-                viewMode === 'chat' ? "text-[#FF8C00] scale-105 font-bold" : "text-zinc-500 hover:text-white"
+                viewMode === 'chat' 
+                  ? (activeTheme.id === 'abysses' ? "text-cyan-400 scale-105 font-bold" : activeTheme.id === 'glass-water' ? "text-slate-800 scale-105 font-bold" : "text-[#FF8C00] scale-105 font-bold") 
+                  : "text-zinc-500 hover:text-white"
               }`}
             >
               <MessageCircle className="w-5 h-5" />
@@ -1720,11 +3484,23 @@ export default function App() {
               <button
                 id="nav-btn-camera-scanner"
                 onClick={handleOpenLensCamera}
-                className="w-14 h-14 rounded-full flex flex-col items-center justify-center shadow-xl active:scale-95 transition-all text-zinc-950 bg-[#FF8C00] border-4 border-zinc-950 hover:bg-amber-500 hover:shadow-orange-500/20"
+                className={`w-14 h-14 rounded-full flex flex-col items-center justify-center shadow-xl active:scale-95 transition-all outline-none ${
+                  activeTheme.id === 'sahel-noir'
+                    ? 'text-black bg-[#00FF66] border-4 border-zinc-950 hover:bg-green-400'
+                    : activeTheme.id === 'terracotta-clay'
+                    ? 'text-white bg-[#8F3E2B] border-4 border-white hover:bg-[#A34B38]'
+                    : activeTheme.id === 'urban-brutalist'
+                    ? 'text-white bg-black border-4 border-white hover:bg-neutral-800'
+                    : activeTheme.id === 'abysses'
+                    ? 'text-zinc-950 bg-cyan-400 border-4 border-slate-950 hover:bg-cyan-300'
+                    : activeTheme.id === 'glass-water'
+                    ? 'text-white bg-slate-500 border-4 border-white hover:bg-slate-650 shadow-md'
+                    : 'text-zinc-950 bg-[#FF8C00] border-4 border-zinc-950 hover:bg-amber-500'
+                }`}
                 title="Scanner QR Code"
               >
                 <QrCode className="w-5 h-5 stroke-[2.2] animate-pulse" />
-                <span className="text-[7.5px] font-mono font-black uppercase tracking-wider text-zinc-950 mt-0.5 leading-none">QR CODE</span>
+                <span className={`text-[7.5px] font-mono font-black uppercase tracking-wider mt-0.5 leading-none ${activeTheme.id === 'glass-water' ? 'text-white' : 'text-zinc-950'}`}>QR CODE</span>
               </button>
             </div>
 
@@ -1753,7 +3529,9 @@ export default function App() {
                id="nav-btn-history"
               onClick={() => setViewMode('workspace')}
               className={`flex flex-col items-center gap-1 transition-all select-none ${
-                viewMode === 'workspace' ? "text-green-500 scale-105 font-bold" : "text-zinc-500 hover:text-white"
+                viewMode === 'workspace' 
+                  ? (activeTheme.id === 'sahel-noir' ? "text-emerald-400 scale-105 font-bold" : activeTheme.id === 'abysses' ? "text-cyan-400 scale-105 font-bold" : "text-green-500 scale-105 font-bold") 
+                  : "text-zinc-500 hover:text-white"
               }`}
             >
               <History className="w-5 h-5" />
@@ -1795,6 +3573,70 @@ export default function App() {
         dict={dict}
         activeTheme={activeTheme}
       />
+
+      {/* Modern floating motion-toast alert indicator */}
+      <AnimatePresence>
+        {shareToastText && (
+          <motion.div
+            initial={{ opacity: 0, y: 40, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.9 }}
+            className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 bg-zinc-950/95 border border-amber-500/30 text-white px-5 py-3 rounded-2xl shadow-2xl text-xs font-sans tracking-wide flex items-center gap-2.5 backdrop-blur-md"
+          >
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping inline-block" />
+            <span className="font-semibold">{shareToastText}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* LUXURIOUS FULLSCREEN TRANSITION SPLASH ON TAG CLICK */}
+      <AnimatePresence>
+        {activeTransitionTag && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className={`fixed inset-0 z-50 flex flex-col items-center justify-center p-8 text-center ${
+              activeTheme.id === 'abysses' 
+                ? 'bg-[#010a12] text-white' 
+                : activeTheme.id === 'glass-water'
+                ? 'bg-[#e8f1f2]/95 backdrop-blur-xl text-zinc-900'
+                : activeTheme.id === 'white-noir'
+                ? 'bg-slate-50 text-black'
+                : 'bg-zinc-950 text-white'
+            }`}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              className="space-y-6 max-w-md"
+            >
+              <div className="relative w-20 h-20 mx-auto">
+                <div className={`absolute inset-0 rounded-full border-4 border-t-transparent animate-spin ${
+                  activeTheme.id === 'abysses' ? 'border-cyan-400' : 'border-amber-500'
+                }`} />
+                <Sparkles className={`w-10 h-10 absolute inset-0 m-auto animate-pulse ${
+                  activeTheme.id === 'abysses' ? 'text-cyan-400' : 'text-amber-500'
+                }`} />
+              </div>
+
+              <div className="space-y-2">
+                <span className="text-[10px] uppercase font-mono tracking-widest text-zinc-500">
+                  Exploration du Soko Isolele
+                </span>
+                <h2 className="text-xl md:text-2xl font-black tracking-tight uppercase">
+                  Flux de référence <span className={activeTheme.id === 'abysses' ? 'text-cyan-400' : 'text-amber-500'}>#{activeTransitionTag}</span>
+                </h2>
+                <p className="text-xs text-zinc-400 font-mono animate-pulse">
+                  Filtrage et synchronisation du double séquestre...
+                </p>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
     </div>
   );

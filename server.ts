@@ -1,6 +1,5 @@
 import express from "express";
 import path from "path";
-import { createServer as createViteServer } from "vite";
 import { GoogleGenAI, Type } from "@google/genai";
 import dotenv from "dotenv";
 
@@ -144,6 +143,69 @@ Raw text: "${rawText}"`;
   }
 });
 
+// Robust category extraction helper for Unsplash image simulation
+function getSimulatedImageUrl(prompt: string): string {
+  const p = prompt.toLowerCase();
+  
+  // Clothing / Couture / Fashion / Dress
+  if (p.includes("couture") || p.includes("isolele") || p.includes("dress") || p.includes("fashion") || p.includes("clothing") || p.includes("robe") || p.includes("tissu") || p.includes("panthere") || p.includes("couturier")) {
+    const fashionImages = [
+      "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1566207274740-0f8cf6b7d5a5?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1539109136881-3be0616acf4b?q=80&w=800&auto=format&fit=crop"
+    ];
+    return fashionImages[Math.floor(Math.random() * fashionImages.length)];
+  }
+  
+  // Food / Drink / Nourriture / Grain / Cafe
+  if (p.includes("food") || p.includes("recipe") || p.includes("drink") || p.includes("nourriture") || p.includes("cafe") || p.includes("bread") || p.includes("pain") || p.includes("manioc") || p.includes("plat")) {
+    const foodImages = [
+      "https://images.unsplash.com/photo-1447933601403-0c6688de566e?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1498804103079-a6351b050096?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1555244162-803834f70033?q=80&w=800&auto=format&fit=crop"
+    ];
+    return foodImages[Math.floor(Math.random() * foodImages.length)];
+  }
+
+  // Home / Decor / Mobilier
+  if (p.includes("decor") || p.includes("home") || p.includes("furniture") || p.includes("salon") || p.includes("maison") || p.includes("chaise") || p.includes("lit") || p.includes("canape")) {
+    const homeImages = [
+      "https://images.unsplash.com/photo-1612196808214-b8e1d6145a8c?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1581881067989-7e3eaf45f4f6?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1505691938895-1758d7feb511?q=80&w=800&auto=format&fit=crop"
+    ];
+    return homeImages[Math.floor(Math.random() * homeImages.length)];
+  }
+
+  // Book / Read / Document / Library
+  if (p.includes("book") || p.includes("read") || p.includes("livre") || p.includes("bibliotheque") || p.includes("roman") || p.includes("document")) {
+    const bookImages = [
+      "https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1506880018603-83d5b814b5a6?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1512820790803-83ca734da794?q=80&w=800&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?q=80&w=800&auto=format&fit=crop"
+    ];
+    return bookImages[Math.floor(Math.random() * bookImages.length)];
+  }
+
+  // Electronics / Tech / Cyber / Gadget
+  if (p.includes("elec") || p.includes("phone") || p.includes("computer") || p.includes("ipad") || p.includes("tech") || p.includes("batterie") || p.includes("gadget")) {
+    const elecImages = [
+      "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=600&q=80",
+      "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?auto=format&fit=crop&w=600&q=80",
+      "https://images.unsplash.com/photo-1526738549149-8e07eca6c147?auto=format&fit=crop&w=600&q=80",
+      "https://images.unsplash.com/photo-1555664424-778a1e5e1b48?auto=format&fit=crop&w=600&q=80"
+    ];
+    return elecImages[Math.floor(Math.random() * elecImages.length)];
+  }
+
+  // Generic clean default
+  return "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?q=80&w=800&auto=format&fit=crop";
+}
+
 // 3. Gemini AI / Imagen API: Generate product lookups or image generation
 app.post("/api/gemini/generate-image", async (req: express.Request, res: express.Response) => {
   const { prompt } = req.body;
@@ -155,7 +217,7 @@ app.post("/api/gemini/generate-image", async (req: express.Request, res: express
   const ai = getGeminiClient();
   if (!ai) {
     // simulation fallback - using beautiful Unsplash links matching key product categories
-    res.json({ simulated: true });
+    res.json({ imageUrl: getSimulatedImageUrl(prompt), simulated: true });
     return;
   }
 
@@ -177,42 +239,49 @@ app.post("/api/gemini/generate-image", async (req: express.Request, res: express
         res.json({ imageUrl: `data:image/jpeg;base64,${base64}` });
         return;
       }
-    } catch (imagenErr) {
-      console.warn("Imagen generation failed, falling back to gemini-2.5-flash-image:", imagenErr);
+    } catch (imagenErr: any) {
+      console.warn("Imagen generation failed, falling back to gemini-2.5-flash-image:", imagenErr?.message || imagenErr);
     }
 
     // Try gemini-2.5-flash-image
-    const imageResponse = await ai.models.generateContent({
-      model: "gemini-2.5-flash-image",
-      contents: {
-        parts: [{ text: `${prompt}. High resolution product photography with clean neutral background.` }]
-      },
-      config: {
-        imageConfig: {
-          aspectRatio: "1:1",
+    try {
+      const imageResponse = await ai.models.generateContent({
+        model: "gemini-2.5-flash-image",
+        contents: {
+          parts: [{ text: `${prompt}. High resolution product photography with clean neutral background.` }]
+        },
+        config: {
+          imageConfig: {
+            aspectRatio: "1:1",
+          }
+        }
+      });
+
+      const parts = imageResponse.candidates?.[0]?.content?.parts;
+      let base64Image = "";
+      if (parts) {
+        for (const part of parts) {
+          if (part.inlineData?.data) {
+            base64Image = part.inlineData.data;
+            break;
+          }
         }
       }
-    });
 
-    const parts = imageResponse.candidates?.[0]?.content?.parts;
-    let base64Image = "";
-    if (parts) {
-      for (const part of parts) {
-        if (part.inlineData?.data) {
-          base64Image = part.inlineData.data;
-          break;
-        }
+      if (base64Image) {
+        res.json({ imageUrl: `data:image/png;base64,${base64Image}` });
+        return;
       }
+    } catch (flashErr: any) {
+      console.warn("gemini-2.5-flash-image also failed, falling back to simulated imagery:", flashErr?.message || flashErr);
     }
 
-    if (base64Image) {
-      res.json({ imageUrl: `data:image/png;base64,${base64Image}` });
-    } else {
-      res.json({ simulated: true, note: "Key existed but model did not return image parts" });
-    }
+    // High quality fallback on any generation failures
+    console.log("Both image generation models failed or were throttled. Activating high-fidelity Unsplash simulation.");
+    res.json({ imageUrl: getSimulatedImageUrl(prompt), simulated: true });
   } catch (error: any) {
-    console.error("Image generation error:", error);
-    res.status(500).json({ error: error.message || "Failed to generate image" });
+    console.error("General image handler block went wrong, serving generic safe representation:", error);
+    res.json({ imageUrl: getSimulatedImageUrl(prompt), simulated: true });
   }
 });
 
@@ -326,6 +395,47 @@ app.post("/api/gemini/lens", async (req: express.Request, res: express.Response)
   const { imageBase64 } = req.body;
   if (!imageBase64) {
     res.status(400).json({ error: "Missing required imageBase64 field" });
+    return;
+  }
+
+  // Demonstration lens photo presets intercept
+  if (imageBase64.startsWith("preset:")) {
+    const presetId = imageBase64.replace("preset:", "").trim();
+    let mockResult = {
+      detectedCategory: "Electronics",
+      primaryObject: "MWINDA Solaire Lantern v4",
+      suggestedTags: ["Solar", "Solaire", "Power"],
+      confidenceScore: 99.4,
+      description: "Match visuel parfait : Lanterne solaire de confiance d'urgence Mwinda par rapport visuel."
+    };
+    
+    if (presetId === "lens-coffee") {
+      mockResult = {
+        detectedCategory: "Food",
+        primaryObject: "Pâtisserie du Fleuve",
+        suggestedTags: ["Café", "Viennoiseries", "N'sele"],
+        confidenceScore: 98.7,
+        description: "Match visuel : Grains de café ou service de boulangerie fine de terroir."
+      };
+    } else if (presetId === "lens-fashion") {
+      mockResult = {
+        detectedCategory: "Fashion",
+        primaryObject: "Fashion Isolele",
+        suggestedTags: ["Pagne", "Cotton", "Wax"],
+        confidenceScore: 97.9,
+        description: "Match visuel : Article confectionné avec du tissu ou de l'habillement traditionnel."
+      };
+    } else if (presetId === "lens-book") {
+      mockResult = {
+        detectedCategory: "Livre",
+        primaryObject: "La Dynastie Kongo",
+        suggestedTags: ["Books", "History", "Kongo"],
+        confidenceScore: 99.1,
+        description: "Match visuel : Ouvrage historique relié ou roman d'aventures littéraires."
+      };
+    }
+    
+    res.json(mockResult);
     return;
   }
 
@@ -624,7 +734,8 @@ Answer the user directly and warmly in conversational French, injecting natural 
 
 async function startServer() {
   if (process.env.NODE_ENV !== "production") {
-    // Setup Vite for Dev
+    // Setup Vite dynamically for Dev to prevent any module resolution errors or fileURLToPath crashes in production containers
+    const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",

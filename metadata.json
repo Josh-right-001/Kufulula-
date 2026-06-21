@@ -1,6 +1,6 @@
 {
   "name": "KUFULULA",
   "description": "Elite Full-Stack SaaS Engine with Shop.app Minimalism, Autonomous Gemini Supply Chain & Multi-Rail KYC Fintech (Democratic Republic of Congo).",
-  "requestFramePermissions": ["camera", "microphone"],
+  "requestFramePermissions": ["camera", "microphone", "geolocation"],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

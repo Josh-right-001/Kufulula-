@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Send, Users, ShieldAlert, Sparkles, AlertCircle, ShoppingBag } from "lucide-react";
+import { Send, Users, ShieldAlert, Sparkles, AlertCircle, ShoppingBag, MessageSquare } from "lucide-react";
 import { TranslationDictionary } from "../lib/translations";
 
 interface Merchant {
@@ -227,7 +227,7 @@ export default function MerchantConversationalLounge({
         <div className="space-y-1">
           <h1 className="text-xl md:text-2xl font-sans font-extrabold text-white flex items-center gap-2">
             <Users className="w-5 md:w-6 h-5 md:h-6 text-[#FF8C00] animate-pulse" />
-            Le Salon de Discussion • Négociations en Direct 💬
+            Le Salon de Discussion • Négociations en Direct <MessageSquare className="w-4 md:w-5 h-4 md:h-5 text-amber-500 inline-block align-middle ml-1" />
           </h1>
           <p className="text-xs text-zinc-400">
             Parlez en temps réel avec les Papas et Mamans marchands du Congo pour négocier vos deals et certifier les livraisons.

@@ -22,6 +22,7 @@ export interface Product {
   comments?: { id: string; user: string; text: string; date: string }[];
   colors?: { name: string; value: string }[];
   imagesDetail?: string[];
+  imageGeneratorPrompt?: string;
   specifications?: { label: string; value: string }[];
 }
 

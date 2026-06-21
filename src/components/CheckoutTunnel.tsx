@@ -12,9 +12,10 @@ interface CheckoutTunnelProps {
   cart: CartItem[];
   onSuccess: (tx: DirectTransaction) => void;
   onCancel: () => void;
+  activeTheme?: any;
 }
 
-export default function CheckoutTunnel({ cart, onSuccess, onCancel }: CheckoutTunnelProps) {
+export default function CheckoutTunnel({ cart, onSuccess, onCancel, activeTheme }: CheckoutTunnelProps) {
   const [step, setStep] = useState<'info' | 'kyc_document' | 'kyc_liveness' | 'kyc_verifying' | 'payment' | 'escrow_active' | 'success'>('info');
 
   // Customer Contact State
@@ -231,11 +232,11 @@ export default function CheckoutTunnel({ cart, onSuccess, onCancel }: CheckoutTu
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 font-sans p-6 text-zinc-900 dark:text-zinc-50 flex items-center justify-center">
+    <div className="min-h-screen bg-transparent font-sans p-3 md:p-6 text-inherit flex items-center justify-center">
       {/* Hidden working canvas */}
       <canvas ref={canvasRef} className="hidden" />
 
-      <div className="w-full max-w-2xl bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-850 p-6 md:p-8 rounded-3xl shadow-xl space-y-6">
+      <div className={`w-full max-w-2xl ${activeTheme ? activeTheme.cardClass : "bg-zinc-900 border border-white/5"} p-6 md:p-8 rounded-3xl shadow-xl space-y-6`}>
         
         {/* Progress Bar steps */}
         <div className="flex items-center justify-between border-b border-zinc-100 dark:border-zinc-850 pb-5">

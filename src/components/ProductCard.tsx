@@ -2,7 +2,8 @@ import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { 
   Plus, Eye, Flame, Heart, MessageCircle, Share2, 
-  Handshake, Send, Check, AlertCircle, ShoppingBag 
+  Handshake, Send, Check, AlertCircle, ShoppingBag,
+  Facebook, Twitter, Instagram, Link, MessageSquare, Smartphone, Mail
 } from "lucide-react";
 import { Product } from "../types";
 import { TranslationDictionary } from "../lib/translations";
@@ -34,9 +35,24 @@ export default function ProductCard({ product, onOpenDetails, onAddToCart, dict,
     return saved ? JSON.parse(saved) : (product.comments || []);
   });
 
+  // Sync state with database-loaded product properties
+  useEffect(() => {
+    if (product.likesCount !== undefined) {
+      setLikes(product.likesCount);
+    }
+  }, [product.likesCount]);
+
+  useEffect(() => {
+    if (product.comments !== undefined) {
+      setCommentsList(product.comments);
+    }
+  }, [product.comments]);
+
   const [showComments, setShowComments] = useState(false);
   const [newCommentText, setNewCommentText] = useState("");
   const [commenterName, setCommenterName] = useState("");
+  const [newCommentTag, setNewCommentTag] = useState("");
+  const [showShareModal, setShowShareModal] = useState(false);
 
   // Negotiate simulator states (AI-Powered Congo Bargaining Chat)
   const [showNegotiation, setShowNegotiation] = useState(false);
@@ -61,21 +77,43 @@ export default function ProductCard({ product, onOpenDetails, onAddToCart, dict,
   };
 
   const handleLikeToggle = () => {
-    if (isLiked) {
-      updateLikesInDB(likes - 1, false);
-    } else {
-      updateLikesInDB(likes + 1, true);
+    const nextLiked = !isLiked;
+    const nextLikes = isLiked ? Math.max(0, likes - 1) : likes + 1;
+    updateLikesInDB(nextLikes, nextLiked);
+    
+    // Synchronize k_persistent_favorites
+    let favList: Product[] = [];
+    const stored = localStorage.getItem("k_persistent_favorites");
+    if (stored) {
+      try { favList = JSON.parse(stored); } catch(e) {}
     }
+    if (nextLiked) {
+      if (!favList.some(p => p.id === product.id)) {
+        favList.push(product);
+      }
+    } else {
+      favList = favList.filter(p => p.id !== product.id);
+    }
+    localStorage.setItem("k_persistent_favorites", JSON.stringify(favList));
   };
 
   const handlePostComment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newCommentText.trim()) return;
 
+    let customTags: string[] = [];
+    if (newCommentTag.trim()) {
+      customTags = newCommentTag.trim().split(/[\s,]+/).map(t => {
+        const trimmed = t.trim();
+        return (trimmed.startsWith('@') || trimmed.startsWith('#')) ? trimmed : `@${trimmed}`;
+      });
+    }
+
     const newCommentObj = {
       id: "comment-" + Date.now(),
       user: commenterName.trim() || "Visiteur anonyme",
       text: newCommentText.trim(),
+      tags: customTags,
       date: new Date().toISOString().split("T")[0]
     };
 
@@ -83,6 +121,7 @@ export default function ProductCard({ product, onOpenDetails, onAddToCart, dict,
     setCommentsList(updatedComments);
     setNewCommentText("");
     setCommenterName("");
+    setNewCommentTag("");
     localStorage.setItem(`k_comments_${product.id}`, JSON.stringify(updatedComments));
     await KDb.updateProductInteractions(product.id, likes, updatedComments);
   };
@@ -187,11 +226,18 @@ export default function ProductCard({ product, onOpenDetails, onAddToCart, dict,
   };
 
   const handleShareClick = () => {
-    setShowShareToast(true);
-    navigator.clipboard.writeText(`${window.location.origin}/#product-${product.id}`);
-    setTimeout(() => {
-      setShowShareToast(false);
-    }, 2500);
+    if (navigator.share) {
+      navigator.share({
+        title: product.title,
+        text: product.description,
+        url: `${window.location.origin}/#product/${product.id}`
+      }).catch((e) => {
+        console.warn("Native share error, opening fallback modal", e);
+        setShowShareModal(true);
+      });
+    } else {
+      setShowShareModal(true);
+    }
   };
 
   return (
@@ -368,7 +414,25 @@ export default function ProductCard({ product, onOpenDetails, onAddToCart, dict,
                       <span>{c.user}</span>
                       <span>{c.date}</span>
                     </div>
-                    <p className="text-zinc-250 italic font-sans">"{c.text}"</p>
+                    <div className="flex flex-col gap-0.5">
+                      <p className="text-zinc-250 italic font-sans">"{c.text}"</p>
+                      {c.tags && c.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-0.5">
+                          {c.tags.map((tg: string, idx: number) => (
+                            <span 
+                              key={idx} 
+                              className={`text-[8px] px-1 py-0.5 rounded font-mono font-semibold ${
+                                tg.startsWith('#') 
+                                  ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' 
+                                  : 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20'
+                              }`}
+                            >
+                              {tg}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 ))
               ) : (
@@ -378,13 +442,22 @@ export default function ProductCard({ product, onOpenDetails, onAddToCart, dict,
 
             {/* Insert form comment */}
             <form onSubmit={handlePostComment} className="pt-2 border-t border-zinc-805 space-y-1.5">
-              <input
-                type="text"
-                value={commenterName}
-                onChange={(e) => setCommenterName(e.target.value)}
-                placeholder="Votre nom (ex: Kabasele)"
-                className="w-full px-2 py-1 bg-zinc-950 border border-zinc-800 rounded text-[10px] focus:outline-none focus:ring-1 focus:ring-amber-500"
-              />
+              <div className="grid grid-cols-2 gap-1.5">
+                <input
+                  type="text"
+                  value={commenterName}
+                  onChange={(e) => setCommenterName(e.target.value)}
+                  placeholder="Votre nom (ex: Kabasele)"
+                  className="w-full px-2 py-1 bg-zinc-950 border border-zinc-800 rounded text-[10px] focus:outline-none focus:ring-1 focus:ring-amber-500"
+                />
+                <input
+                  type="text"
+                  value={newCommentTag}
+                  onChange={(e) => setNewCommentTag(e.target.value)}
+                  placeholder="Tag d'ami (ex: @jean, #wax)"
+                  className="w-full px-2 py-1 bg-zinc-950 border border-zinc-800 rounded text-[10px] focus:outline-none focus:ring-1 focus:ring-amber-500"
+                />
+              </div>
               <div className="flex gap-1.5">
                 <input
                   type="text"
@@ -395,7 +468,7 @@ export default function ProductCard({ product, onOpenDetails, onAddToCart, dict,
                 />
                 <button
                   type="submit"
-                  className="px-2.5 bg-amber-500 text-zinc-950 rounded hover:bg-amber-600 flex items-center justify-center"
+                  className="px-2.5 bg-amber-500 text-zinc-950 rounded hover:bg-amber-600 flex items-center justify-center cursor-pointer"
                 >
                   <Send className="w-3.5 h-3.5" />
                 </button>
@@ -566,6 +639,146 @@ export default function ProductCard({ product, onOpenDetails, onAddToCart, dict,
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* SHARING PORTABLE APP POPUP OVERLAY */}
+      <AnimatePresence>
+        {showShareModal && (
+          <div className="fixed inset-0 z-[999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="w-full max-w-sm bg-zinc-950 border border-white/10 rounded-3xl p-6 space-y-4 text-center shadow-2xl relative"
+            >
+              <div className="flex justify-between items-center pb-2 border-b border-white/5">
+                <span className="text-[10px] font-bold font-mono tracking-wider text-amber-500 uppercase">Partager l'article</span>
+                <button
+                  type="button"
+                  onClick={() => setShowShareModal(false)}
+                  className="w-7 h-7 rounded-full bg-zinc-900 border border-white/10 text-zinc-400 hover:text-white flex items-center justify-center text-xs font-bold cursor-pointer"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="space-y-1">
+                <h4 className="text-xs font-bold text-white leading-tight">{product.title}</h4>
+                <p className="text-[9px] text-zinc-500">Sélectionnez une application installée sur votre mobile :</p>
+              </div>
+
+              {/* Grid of installed apps icons list */}
+              <div className="grid grid-cols-4 gap-2.5 py-2">
+                <a
+                  href={`https://api.whatsapp.com/send?text=${encodeURIComponent("Regarde ce produit magnifique sur KUFULULA : " + product.title + " " + window.location.origin + "/#product/" + product.id)}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={() => setShowShareModal(false)}
+                  className="flex flex-col items-center gap-1.5 p-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-850 border border-white/5 text-xs transition-colors"
+                >
+                  <MessageSquare className="w-5 h-5 text-emerald-400" />
+                  <span className="text-[8px] font-mono text-zinc-400">WhatsApp</span>
+                </a>
+
+                <a
+                  href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.origin + "/#product/" + product.id)}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={() => setShowShareModal(false)}
+                  className="flex flex-col items-center gap-1.5 p-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-850 border border-white/5 text-xs transition-colors"
+                >
+                  <Facebook className="w-5 h-5 text-blue-500 fill-blue-500/20" />
+                  <span className="text-[8px] font-mono text-zinc-400">Facebook</span>
+                </a>
+
+                <a
+                  href={`https://twitter.com/intent/tweet?text=${encodeURIComponent("Regarde ce produit magnifique sur KUFULULA : " + product.title)}&url=${encodeURIComponent(window.location.origin + "/#product/" + product.id)}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={() => setShowShareModal(false)}
+                  className="flex flex-col items-center gap-1.5 p-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-850 border border-white/5 text-xs transition-colors"
+                >
+                  <Twitter className="w-5 h-5 text-sky-400" />
+                  <span className="text-[8px] font-mono text-zinc-400">Twitter X</span>
+                </a>
+
+                <a
+                  href={`https://t.me/share/url?url=${encodeURIComponent(window.location.origin + "/#product/" + product.id)}&text=${encodeURIComponent(product.title)}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={() => setShowShareModal(false)}
+                  className="flex flex-col items-center gap-1.5 p-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-850 border border-white/5 text-xs transition-colors"
+                >
+                  <Send className="w-5 h-5 text-cyan-400" />
+                  <span className="text-[8px] font-mono text-zinc-400">Telegram</span>
+                </a>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText(`${window.location.origin}/#product/${product.id}`);
+                    setShowShareToast(true);
+                    setShowShareModal(false);
+                    setTimeout(() => setShowShareToast(false), 2000);
+                  }}
+                  className="flex flex-col items-center gap-1.5 p-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-850 border border-white/5 text-xs transition-colors cursor-pointer w-full"
+                >
+                  <Instagram className="w-5 h-5 text-pink-500" />
+                  <span className="text-[8px] font-mono text-zinc-400">Instagram</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText(`${window.location.origin}/#product/${product.id}`);
+                    setShowShareToast(true);
+                    setShowShareModal(false);
+                    setTimeout(() => setShowShareToast(false), 2000);
+                  }}
+                  className="flex flex-col items-center gap-1.5 p-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-850 border border-white/5 text-xs transition-colors cursor-pointer w-full"
+                >
+                  <Smartphone className="w-5 h-5 text-yellow-400" />
+                  <span className="text-[8px] font-mono text-zinc-400">Snapchat</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText(`${window.location.origin}/#product/${product.id}`);
+                    setShowShareToast(true);
+                    setShowShareModal(false);
+                    setTimeout(() => setShowShareToast(false), 2000);
+                  }}
+                  className="flex flex-col items-center gap-1.5 p-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-850 border border-white/5 text-xs transition-colors cursor-pointer w-full"
+                >
+                  <Mail className="w-5 h-5 text-indigo-400" />
+                  <span className="text-[8px] font-mono text-zinc-400">SMS</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText(`${window.location.origin}/#product/${product.id}`);
+                    setShowShareToast(true);
+                    setShowShareModal(false);
+                    setTimeout(() => setShowShareToast(false), 2000);
+                  }}
+                  className="flex flex-col items-center gap-1.5 p-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-zinc-950 font-bold border border-amber-600 text-xs transition-colors cursor-pointer w-full"
+                >
+                  <Link className="w-5 h-5 text-zinc-950" />
+                  <span className="text-[8px] font-mono font-bold">Lien</span>
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Floated Share Toast Confirmation banner */}
+      {showShareToast && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[1000] bg-green-500 text-zinc-950 text-xs font-mono font-semibold px-4 py-2 rounded-full shadow-lg">
+          Lien de l'article copié et prêt à être partagé ! 😊
+        </div>
+      )}
 
     </motion.div>
   );

@@ -12,7 +12,7 @@ import { Product, DirectTransaction, UserAuth, UserRole } from "../types";
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId); // CRITICAL: The app will break without this line
+export const db = getFirestore(app, (firebaseConfig as any).firestoreDatabaseId); // CRITICAL: The app will break without this line
 export const auth = getAuth(app);
 
 // Handle Firestore Errors (Mandated by SKILL.md guide)
@@ -68,6 +68,10 @@ async function testConnection() {
   try {
     await getDocFromServer(doc(db, "test", "connection"));
   } catch (error) {
+    console.error("Firebase connection test error detailed:", error);
+    if (error instanceof Error) {
+      console.error("Error message:", error.message, "Name:", error.name);
+    }
     if (error instanceof Error && error.message.includes("the client is offline")) {
       console.error("Please check your Firebase configuration.");
     }
@@ -368,15 +372,115 @@ const PRODUCTS_DATA_SOURCE = [
   {
     category: "Fashion",
     items: [
+      {
+        id: "fashion-isolele-buste-perle",
+        title: "Fashion Isolele - Buste Perlé Masque Kongo d'Apparat",
+        price: 190,
+        originalPrice: 320,
+        vendor: "Isolele Atelier de Haute Couture",
+        desc: "Manteau d'apparat en laine bouillie brune doté d'une broderie dorsale d'exception représentant un masque traditionnel Kongo en perles fines, cauris et plumes de coq, inspiré de l'héritage d'Afrique Centrale.",
+        image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=800&auto=format&fit=crop",
+        tags: ["Fashion", "Isolele", "Luxe", "Kongo", "Perle"]
+      },
+      {
+        id: "fashion-isolele-lanceur-feu",
+        title: "Fashion Isolele - Habit du Souffleur de Feu Rituel",
+        price: 290,
+        originalPrice: 410,
+        vendor: "Isolele Atelier de Haute Couture",
+        desc: "Ensemble rituel rituel composée d'une jupe en fibres de raphia sauvage peignées, de bracelets de chevilles en graines d'acacia d'écorce dure et de peintures corporelles rituelles à l'argile blanche.",
+        image: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=800&auto=format&fit=crop",
+        tags: ["Fashion", "Isolele", "Raphia", "Rituel", "Spectacle"]
+      },
+      {
+        id: "fashion-isolele-bambou-osier",
+        title: "Fashion Isolele - Robe Sculpturale en Osier & Bambou",
+        price: 350,
+        originalPrice: 500,
+        vendor: "Isolele Atelier de Haute Couture",
+        desc: "Robe d'avant-garde aux lignes architecturales audacieuses. Corset rigide tressé à la main en lattes de bambou frais et panier d'osier verni des rives du fleuve Congo, marié à un maquillage rituel de kaolin blanc d'une beauté pure.",
+        image: "https://images.unsplash.com/photo-1582533561751-ef6f6ab93a2e?q=80&w=800&auto=format&fit=crop",
+        tags: ["Fashion", "Isolele", "Osier", "Sculptural", "AvantGarde"]
+      },
+      {
+        id: "fashion-isolele-grand-defile",
+        title: "Fashion Isolele - Robe Traîne Royale du Katanga",
+        price: 240,
+        originalPrice: 360,
+        vendor: "Isolele Atelier de Haute Couture",
+        desc: "Spectaculaire robe de gala drapée à épaulettes prononcées et longue traîne monumentale. Présentée fièrement sur le tarmac d'honneur orné de drapeaux de la RDC lors de l'ouverture de la fashion week.",
+        image: "https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=800&auto=format&fit=crop",
+        tags: ["Fashion", "Isolele", "Traîne", "Defile", "Congo"]
+      },
+      {
+        id: "fashion-isolele-panthere-nuit",
+        title: "Fashion Isolele - Long Coat Félin Impérial",
+        price: 280,
+        originalPrice: 400,
+        vendor: "Isolele Atelier de Haute Couture",
+        desc: "Manteau cintré haut de gamme recouvert de motifs léopardés somptueux saluant le symbole traditionnel du chef coutumier congolais. Présenté lors d'un défilé extérieur de prestige sous la lumière des projecteurs.",
+        image: "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?q=80&w=800&auto=format&fit=crop",
+        tags: ["Fashion", "Isolele", "Leopard", "Chefs", "Nuit"]
+      },
+      {
+        id: "fashion-isolele-cap-mandala",
+        title: "Fashion Isolele - Veste Noire & Cape Mandala d'Ébène",
+        price: 310,
+        originalPrice: 450,
+        vendor: "Isolele Atelier de Haute Couture",
+        desc: "Tailleur couture noir de jais cintré, rehaussé d'une cape circulaire impériale ornée d'arabesques géométriques imprimées en or et orange, immortalisé devant les fûts de l'Echangeur de Limete.",
+        image: "https://images.unsplash.com/photo-1539109136881-3be0616acf4b?q=80&w=800&auto=format&fit=crop",
+        tags: ["Fashion", "Isolele", "Limete", "Mandala", "Gold"]
+      },
+      {
+        id: "fashion-isolele-lanterne-sunset",
+        title: "Fashion Isolele - Robe de Crépuscule au Flambeau",
+        price: 150,
+        originalPrice: 220,
+        vendor: "Isolele Atelier de Haute Couture",
+        desc: "Ajustement soyeux d'un fourreau en lin froissé, capturé au coucher de soleil kinois. Le mannequin tient à la main la lanterne solaire autonome d'or fff8c00 d'Isolele.",
+        image: "https://images.unsplash.com/photo-1540206395-68808572332f?w=500&auto=format&fit=crop&q=60",
+        tags: ["Fashion", "Isolele", "Sunset", "Lin", "Flambeau"]
+      },
+      {
+        id: "fashion-isolele-jute-brute",
+        title: "Fashion Isolele - Blazer en Sac de Jute Recyclée",
+        price: 180,
+        originalPrice: 270,
+        vendor: "Isolele Atelier de Haute Couture",
+        desc: "Manteau et étole écologiques entièrement façonnés dans de la toile de lin et d'épaisses toiles de jute à grains, finis de franges asymétriques coupées main arborant un style dandy inimitable.",
+        image: "https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=800&auto=format&fit=crop",
+        tags: ["Fashion", "Isolele", "Jute", "Eco", "Veste"]
+      },
+      {
+        id: "fashion-isolele-mousse-moutarde",
+        title: "Fashion Isolele - Robe à Franges Jaune Moutarde",
+        price: 165,
+        originalPrice: 240,
+        vendor: "Isolele Atelier de Haute Couture",
+        desc: "Habit asymétrique d'élégance kinoise de couleur moutarde éclatante agrémenté de fines franges volantes, sublimé d'une coiffe de nattes tressées et d'un fard facial traditionnel blanc d'une beauté pure.",
+        image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=800&auto=format&fit=crop",
+        tags: ["Fashion", "Isolele", "Moutarde", "Tresses", "Beauté"]
+      },
       { 
         id: "superwax-congo", 
         title: "Super-Wax Block Congo Impérial", 
         price: 75, 
         originalPrice: 95, 
         vendor: "Maison de Pagne Kinshasa", 
-        desc: "Tissu wax haut de gamme en pur coton peigné, longueur 6 yards. Motifs festifs authentiques colorés pour dote et cérémonies.", 
+        desc: "Tissu wax haut de gamme en pur coton peigné, longueur 6 yards. Motifs festifs authentiques colorés pour dote et cérémonies d'une beauté traditionnelle.", 
         image: "https://images.unsplash.com/photo-1566207274740-0f8cf6b7d5a5?q=80&w=800&auto=format&fit=crop",
         tags: ["Pagne", "Cotton", "Premium", "Kinshasa"] 
+      },
+      {
+        id: "fashion-isolele-design",
+        title: "Fashion Isolele - Sceptre de Cérémonie Royal",
+        price: 95,
+        originalPrice: 150,
+        vendor: "Isolele Atelier de Haute Couture",
+        desc: "Magnifique ensemble de drapés exclusifs orné de motifs tribaux de la couronne, créés par les designers d'Isolele sous l'égide directe de Sa Majesté le Roi Kufulula.",
+        image: "/src/assets/images/kufulula_design_options_1780511171548.png",
+        tags: ["Fashion", "Isolele", "Pagne", "Premium"]
       },
       { 
         id: "wedding-planning", 
@@ -725,7 +829,44 @@ const build52InitialProducts = (): Product[] => {
         { name: "Amber Orange Glow", value: "#FF8C00" },
         { name: "Kongo White Cotton", value: "#F4F4F6" }
       ];
-      (p as any).imagesDetail = [singleImage];
+      
+      // Generate exactly 5 varied angles for premium multi-angle swipe
+      const categoryGallery: Record<string, string[]> = {
+        Electronics: [
+          "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=600&q=80",
+          "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?auto=format&fit=crop&w=600&q=80",
+          "https://images.unsplash.com/photo-1526738549149-8e07eca6c147?auto=format&fit=crop&w=600&q=80",
+          "https://images.unsplash.com/photo-1555664424-778a1e5e1b48?auto=format&fit=crop&w=600&q=80"
+        ],
+        Food: [
+          "https://images.unsplash.com/photo-1447933601403-0c6688de566e?auto=format&fit=crop&w=600&q=80",
+          "https://images.unsplash.com/photo-1498804103079-a6351b050096?auto=format&fit=crop&w=600&q=80",
+          "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=600&q=80",
+          "https://images.unsplash.com/photo-1555244162-803834f70033?auto=format&fit=crop&w=600&q=80"
+        ],
+        Fashion: [
+          "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=600&q=80",
+          "https://images.unsplash.com/photo-1566207274740-0f8cf6b7d5a5?auto=format&fit=crop&w=600&q=80",
+          "https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=600&q=80",
+          "https://images.unsplash.com/photo-1539109136881-3be0616acf4b?auto=format&fit=crop&w=600&q=80"
+        ],
+        Home: [
+          "https://images.unsplash.com/photo-1612196808214-b8e1d6145a8c?auto=format&fit=crop&w=600&q=80",
+          "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=600&q=80",
+          "https://images.unsplash.com/photo-1581881067989-7e3eaf45f4f6?auto=format&fit=crop&w=600&q=80",
+          "https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=600&q=80"
+        ],
+        Livre: [
+          "https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&w=600&q=80",
+          "https://images.unsplash.com/photo-1506880018603-83d5b814b5a6?auto=format&fit=crop&w=600&q=80",
+          "https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=600&q=80",
+          "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=600&q=80"
+        ]
+      };
+      
+      const customAngles = categoryGallery[category] || categoryGallery["Fashion"];
+      (p as any).imagesDetail = [p.image, ...customAngles];
+
       (p as any).specifications = [
         { label: "Prestataire / Fabricant", value: item.vendor },
         { label: "Origine Terroir RDC", value: item.tags[item.tags.length - 1] || "Kinshasa" },
@@ -774,10 +915,27 @@ export const KDb = {
       if (!snapshot.empty) {
         const list: Product[] = [];
         snapshot.forEach(docSnap => {
-          list.push(docSnap.data() as Product);
+          const item = docSnap.data();
+          if (item && item.id && item.title) {
+            list.push(item as Product);
+          }
         });
-        return list.filter((p: Product) => !p.isDraft);
+        if (list.length > 0) {
+          return list.filter((p: Product) => !p.isDraft);
+        }
       }
+      
+      // Database empty or only contains incomplete documents: let's perform self-healing auto-seed
+      console.log("Firestore empty or lacks products catalog. Seeding INITIAL_PRODUCTS...");
+      const list = getStorageItem("k_products_v3", INITIAL_PRODUCTS);
+      for (const p of list) {
+        try {
+          await setDoc(doc(db, "products", p.id), p);
+        } catch (err) {
+          console.warn(`Failed to seed product ${p.id}:`, err);
+        }
+      }
+      return list.filter((p: Product) => !p.isDraft);
     } catch (e) {
       console.warn("Firestore read failed, using localStorage fallback:", e);
     }
@@ -791,9 +949,14 @@ export const KDb = {
       if (!snapshot.empty) {
         const list: Product[] = [];
         snapshot.forEach(docSnap => {
-          list.push(docSnap.data() as Product);
+          const item = docSnap.data();
+          if (item && item.id && item.title) {
+            list.push(item as Product);
+          }
         });
-        return list;
+        if (list.length > 0) {
+          return list;
+        }
       }
     } catch (e) {
       console.warn("Firestore admin read failed, using localStorage:", e);
@@ -822,20 +985,21 @@ export const KDb = {
   async updateProductInteractions(productId: string, likes: number, comments: any[]): Promise<void> {
     const products = getStorageItem("k_products_v3", INITIAL_PRODUCTS);
     const index = products.findIndex((p: Product) => p.id === productId);
+    let targetPayload: any = { likesCount: likes, comments: comments };
+
     if (index >= 0) {
-      products[index] = {
+      const updated = {
         ...products[index],
         likesCount: likes,
         comments: comments
       } as any;
+      products[index] = updated;
       setStorageItem("k_products_v3", products);
+      targetPayload = updated; // Use the complete product payload so we write a complete document
     }
 
     try {
-      await setDoc(doc(db, "products", productId), {
-        likesCount: likes,
-        comments: comments
-      }, { merge: true });
+      await setDoc(doc(db, "products", productId), targetPayload, { merge: true });
     } catch (e) {
       handleFirestoreError(e, OperationType.UPDATE, `products/${productId}`);
     }
@@ -889,6 +1053,12 @@ export const KDb = {
   }
 };
 
+let cachedAccessToken: string | null = null;
+export const getAccessToken = (): string | null => cachedAccessToken;
+export const setAccessToken = (token: string | null): void => {
+  cachedAccessToken = token;
+};
+
 export const KAuth = {
   async getCurrentUser(): Promise<UserAuth | null> {
     const local = getStorageItem("k_current_user", null);
@@ -917,7 +1087,18 @@ export const KAuth = {
 
   async signInWithGoogleReal(): Promise<UserAuth> {
     const provider = new GoogleAuthProvider();
+    // Add Gmail, Calendar, Contacts, and Drive scopes requested by the user
+    provider.addScope("https://mail.google.com/");
+    provider.addScope("https://www.googleapis.com/auth/calendar");
+    provider.addScope("https://www.googleapis.com/auth/contacts");
+    provider.addScope("https://www.googleapis.com/auth/drive");
+
     const result = await signInWithPopup(auth, provider);
+    const credential = GoogleAuthProvider.credentialFromResult(result);
+    if (credential?.accessToken) {
+      cachedAccessToken = credential.accessToken;
+    }
+
     const fbUser = result.user;
     const email = fbUser.email || "customer@kufulula.cd";
 
@@ -931,7 +1112,7 @@ export const KAuth = {
     const user: UserAuth = {
       uid: fbUser.uid,
       email: email,
-      displayName: fbUser.displayName || email.split("@")[0].toUpperCase().replace(".", " "),
+      displayName: fbUser.displayName || fbUser.displayName || email.split("@")[0].toUpperCase().replace(".", " "),
       photoURL: fbUser.photoURL || `https://api.dicebear.com/7.x/adventurer/svg?seed=${email}`,
       role: role,
       isVerified: fbUser.emailVerified
@@ -964,6 +1145,7 @@ export const KAuth = {
 
   async signOut(): Promise<void> {
     localStorage.removeItem("k_current_user");
+    cachedAccessToken = null;
     try {
       await fbSignOut(auth);
     } catch (e) {

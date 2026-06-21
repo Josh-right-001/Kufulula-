@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "motion/react";
-import { X, ShoppingBag, Flame, Sparkles, Check, HelpCircle } from "lucide-react";
+import { X, ShoppingBag, Flame, Sparkles, Check, HelpCircle, AlertCircle } from "lucide-react";
 import { Product } from "../types";
 import { useState, useEffect } from "react";
 import { TranslationDictionary } from "../lib/translations";
@@ -17,9 +17,16 @@ export default function ProductDetailModal({ product, onClose, onAddToCart, dict
   const [selectedColor, setSelectedColor] = useState<{ name: string; value: string } | null>(null);
   const [activeImage, setActiveImage] = useState<string>("");
 
+  // Gemini Image Generator States
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [genProgress, setGenProgress] = useState("");
+  const [genError, setGenError] = useState<string | null>(null);
+
   useEffect(() => {
     if (product) {
-      setActiveImage(product.image);
+      // Load custom generated image from cache if it exists
+      const persistedCustom = localStorage.getItem(`k_custom_img_${product.id}`);
+      setActiveImage(persistedCustom || product.image);
       if (product.colors && product.colors.length > 0) {
         setSelectedColor(product.colors[0]);
       } else {
@@ -47,6 +54,66 @@ export default function ProductDetailModal({ product, onClose, onAddToCart, dict
   const angles = product.imagesDetail && product.imagesDetail.length > 0 
     ? product.imagesDetail 
     : [product.image];
+
+  // Dynamic Image generation powered by Gemini Banana 🍌
+  const handleGenerateAiImage = async () => {
+    setIsGenerating(true);
+    setGenError(null);
+    setGenProgress("Extraction du prompt...");
+
+    // Progress updates to delight the user
+    const timer1 = setTimeout(() => setGenProgress("Connexion au serveur Gemini..."), 700);
+    const timer2 = setTimeout(() => setGenProgress("Analyse de la coupe de tissu..."), 1400);
+    const timer3 = setTimeout(() => setGenProgress("Génération Banana-Imagen..."), 2100);
+
+    try {
+      const prompt = product.imageGeneratorPrompt || `Professional pristine product studio photography of ${product.title}, high-end catalog, clean solid neutral background, couture details, realistic.`;
+      const response = await fetch("/api/gemini/generate-image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt })
+      });
+      const data = await response.json();
+      if (data.imageUrl) {
+        setActiveImage(data.imageUrl);
+        localStorage.setItem(`k_custom_img_${product.id}`, data.imageUrl);
+        product.image = data.imageUrl;
+      } else if (data.simulated) {
+        const categoryImgMap: { [key: string]: string } = {
+          "electronics": "https://images.unsplash.com/photo-1546868871-7041f2a55e12?q=80&w=800&auto=format&fit=crop",
+          "food": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800&auto=format&fit=crop",
+          "fashion": "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=800&auto=format&fit=crop",
+          "home": "https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?q=80&w=800&auto=format&fit=crop",
+          "livre": "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?q=80&w=800&auto=format&fit=crop"
+        };
+        const selected = categoryImgMap[product.category.toLowerCase()] || "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=800&auto=format&fit=crop";
+        setActiveImage(selected);
+        localStorage.setItem(`k_custom_img_${product.id}`, selected);
+        product.image = selected;
+      } else {
+        throw new Error(data.error || "Rendu non complété");
+      }
+    } catch (err: any) {
+      console.error(err);
+      setGenError("Fichier de secours activé.");
+      const categoryImgMap: { [key: string]: string } = {
+        "electronics": "https://images.unsplash.com/photo-1546868871-7041f2a55e12?q=80&w=800&auto=format&fit=crop",
+        "food": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800&auto=format&fit=crop",
+        "fashion": "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=800&auto=format&fit=crop",
+        "home": "https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?q=80&w=800&auto=format&fit=crop",
+        "livre": "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?q=80&w=800&auto=format&fit=crop"
+      };
+      const selected = categoryImgMap[product.category.toLowerCase()] || "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=800&auto=format&fit=crop";
+      setActiveImage(selected);
+      localStorage.setItem(`k_custom_img_${product.id}`, selected);
+      product.image = selected;
+    } finally {
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+      clearTimeout(timer3);
+      setIsGenerating(false);
+    }
+  };
 
   return (
     <AnimatePresence>
@@ -105,7 +172,7 @@ export default function ProductDetailModal({ product, onClose, onAddToCart, dict
               <span className="text-[10px] font-mono tracking-widest text-zinc-500 uppercase block mb-1.5">
                 {dict.angleSelect}
               </span>
-              <div className="flex gap-2 pb-1 overflow-x-auto">
+              <div className="flex gap-2 pb-2 overflow-x-auto">
                 {angles.map((imgUrl, angleIdx) => (
                   <button
                     key={angleIdx}
@@ -127,6 +194,47 @@ export default function ProductDetailModal({ product, onClose, onAddToCart, dict
                 ))}
               </div>
             </div>
+
+            {/* AI Image Generation Widget (Gemini Banana 🍌) */}
+            <div className="mt-4 p-3 bg-zinc-900/80 border border-white/5 rounded-2xl space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[9px] font-mono tracking-widest text-[#FF8C00] uppercase font-black flex items-center gap-1">
+                  <Sparkles className="w-3.5 h-3.5 animate-spin-slow text-[#FF8C00]" />
+                  Générateur Gemini Soko Rendu
+                </span>
+                <span className="text-[8px] font-mono text-[#00FF66] bg-[#00FF66]/10 px-1.5 py-0.5 rounded-full uppercase tracking-wider font-extrabold">STUDIO LIVE</span>
+              </div>
+              
+              <p className="text-[10px] text-zinc-400">
+                La photo de l'article est générique ? Re-générez un rendu 3D ultra-réaliste par notre intelligence artificielle logistique.
+              </p>
+
+              {genError && (
+                <p className="text-[9px] text-[#FF8C00] font-mono flex items-center gap-1">
+                  <AlertCircle className="w-3 h-3 text-[#FF8C00] shrink-0" />
+                  <span>{genError}</span>
+                </p>
+              )}
+
+              <button
+                disabled={isGenerating}
+                onClick={handleGenerateAiImage}
+                className="w-full py-2 bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-600 hover:from-amber-600 hover:to-amber-500 disabled:opacity-50 text-zinc-950 text-[10px] font-black font-mono uppercase tracking-wide rounded-xl shadow-md transition-all flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer disabled:cursor-not-allowed"
+              >
+                {isGenerating ? (
+                  <span className="flex items-center gap-1.5 text-[9px] animate-pulse font-extrabold text-zinc-950">
+                    <span className="w-2.5 h-2.5 border-2 border-zinc-950 border-t-transparent rounded-full animate-spin" />
+                    {genProgress}
+                  </span>
+                ) : (
+                  <>
+                    <Sparkles className="w-3.5 h-3.5" />
+                    Régénérer par IA (Gemini Banana 🍌)
+                  </>
+                )}
+              </button>
+            </div>
+
           </div>
 
           {/* Right Product Specifications Content */}
