@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "motion/react";
-import { Send, Users, ShieldAlert, Sparkles, AlertCircle, ShoppingBag, MessageSquare } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Send, Users, ShieldAlert, AlertCircle, ShoppingBag, MessageSquare } from "lucide-react";
 import { TranslationDictionary } from "../lib/translations";
 
 interface Merchant {
@@ -234,7 +234,7 @@ export default function MerchantConversationalLounge({
           </p>
         </div>
         <div className="bg-[#FF8C00]/10 border border-[#FF8C00]/30 rounded-full px-3 py-1 flex items-center gap-1.5 self-start md:self-auto">
-          <Sparkles className="w-3.5 h-3.5 text-[#FF8C00] animate-spin-slow" />
+          <ShieldAlert className="w-3.5 h-3.5 text-[#FF8C00]" />
           <span className="text-[10px] font-mono uppercase text-[#FF8C00] font-bold">DOUBLE SÉQUESTRE GARANTI</span>
         </div>
       </div>

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence } from "framer-motion";
 import { 
   Plus, Eye, Flame, Heart, MessageCircle, Share2, 
   Handshake, Send, Check, AlertCircle, ShoppingBag,
-  Facebook, Twitter, Instagram, Link, MessageSquare, Smartphone, Mail
+  Facebook, Twitter, Instagram, Link, MessageSquare, Smartphone, Mail, Camera
 } from "lucide-react";
 import { Product } from "../types";
 import { TranslationDictionary } from "../lib/translations";
@@ -16,9 +16,62 @@ interface ProductCardProps {
   onAddToCart: (product: Product) => void;
   dict: TranslationDictionary;
   activeTheme?: any;
+  onOpenSellerStore?: (vendorName: string) => void;
 }
 
-export default function ProductCard({ product, onOpenDetails, onAddToCart, dict, activeTheme }: ProductCardProps) {
+const getCategoryFallbackImage = (category: string, id: string): string => {
+  const hash = id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const index = hash % 3;
+  
+  const electronics = [
+    "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?q=80&w=800&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?q=80&w=800&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1526738549149-8e07eca6c147?q=80&w=800&auto=format&fit=crop"
+  ];
+  const food = [
+    "https://images.unsplash.com/photo-1447933601403-0c6688de566e?q=80&w=800&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1587132137056-bfbf0166836e?q=80&w=800&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1556910103-1c02745aae4d?q=80&w=800&auto=format&fit=crop"
+  ];
+  const fashion = [
+    "https://images.unsplash.com/photo-1566207274740-0f8cf6b7d5a5?q=80&w=800&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=800&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1539109136881-3be0616acf4b?q=80&w=800&auto=format&fit=crop"
+  ];
+  const home = [
+    "https://images.unsplash.com/photo-1612196808214-b8e1d6145a8c?q=80&w=800&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1592078615290-033ee584e267?q=80&w=800&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1616046229478-9901c5536a45?q=80&w=800&auto=format&fit=crop"
+  ];
+  const book = [
+    "https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=800&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1512820790803-83ca734da794?q=80&w=800&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?q=80&w=800&auto=format&fit=crop"
+  ];
+
+  const cat = (category || "").toLowerCase();
+  if (cat.includes("food") || cat.includes("agro") || cat.includes("alimen")) {
+    return food[index];
+  } else if (cat.includes("fash") || cat.includes("mod")) {
+    return fashion[index];
+  } else if (cat.includes("elect") || cat.includes("tech")) {
+    return electronics[index];
+  } else if (cat.includes("home") || cat.includes("art") || cat.includes("decor")) {
+    return home[index];
+  } else if (cat.includes("book") || cat.includes("livr") || cat.includes("educ")) {
+    return book[index];
+  }
+  return electronics[0];
+};
+
+export default function ProductCard({ product, onOpenDetails, onAddToCart, dict, activeTheme, onOpenSellerStore }: ProductCardProps) {
+  const [imgSrc, setImgSrc] = useState<string>(product.image || "");
+
+  useEffect(() => {
+    if (product.image) {
+      setImgSrc(product.image);
+    }
+  }, [product.image]);
   const isCdf = product.currency === "CDF";
   
   // Real Interactive counters backed by state and localStorage synched
@@ -52,6 +105,7 @@ export default function ProductCard({ product, onOpenDetails, onAddToCart, dict,
   const [newCommentText, setNewCommentText] = useState("");
   const [commenterName, setCommenterName] = useState("");
   const [newCommentTag, setNewCommentTag] = useState("");
+  const [commentImage, setCommentImage] = useState<string | null>(null);
   const [showShareModal, setShowShareModal] = useState(false);
 
   // Negotiate simulator states (AI-Powered Congo Bargaining Chat)
@@ -97,9 +151,54 @@ export default function ProductCard({ product, onOpenDetails, onAddToCart, dict,
     localStorage.setItem("k_persistent_favorites", JSON.stringify(favList));
   };
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        alert("La taille de l'image ne doit pas dépasser 2 Mo.");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setCommentImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleLikeComment = async (commentId: string) => {
+    const updatedComments = commentsList.map(c => {
+      if (c.id === commentId) {
+        const likedUsers = c.likedUsers || [];
+        const alreadyLiked = likedUsers.includes("visitor_user");
+        let nextLikedUsers = [...likedUsers];
+        let nextLikes = c.likes || 0;
+        
+        if (alreadyLiked) {
+          nextLikedUsers = nextLikedUsers.filter((u: string) => u !== "visitor_user");
+          nextLikes = Math.max(0, nextLikes - 1);
+        } else {
+          nextLikedUsers.push("visitor_user");
+          nextLikes += 1;
+        }
+        
+        return {
+          ...c,
+          likes: nextLikes,
+          likedUsers: nextLikedUsers
+        };
+      }
+      return c;
+    });
+
+    setCommentsList(updatedComments);
+    localStorage.setItem(`k_comments_${product.id}`, JSON.stringify(updatedComments));
+    await KDb.updateProductInteractions(product.id, likes, updatedComments);
+  };
+
   const handlePostComment = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newCommentText.trim()) return;
+    if (!newCommentText.trim() && !commentImage) return;
 
     let customTags: string[] = [];
     if (newCommentTag.trim()) {
@@ -114,7 +213,10 @@ export default function ProductCard({ product, onOpenDetails, onAddToCart, dict,
       user: commenterName.trim() || "Visiteur anonyme",
       text: newCommentText.trim(),
       tags: customTags,
-      date: new Date().toISOString().split("T")[0]
+      date: new Date().toISOString().split("T")[0],
+      image: commentImage || undefined,
+      likes: 0,
+      likedUsers: []
     };
 
     const updatedComments = [newCommentObj, ...commentsList];
@@ -122,6 +224,7 @@ export default function ProductCard({ product, onOpenDetails, onAddToCart, dict,
     setNewCommentText("");
     setCommenterName("");
     setNewCommentTag("");
+    setCommentImage(null);
     localStorage.setItem(`k_comments_${product.id}`, JSON.stringify(updatedComments));
     await KDb.updateProductInteractions(product.id, likes, updatedComments);
   };
@@ -226,18 +329,7 @@ export default function ProductCard({ product, onOpenDetails, onAddToCart, dict,
   };
 
   const handleShareClick = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: product.title,
-        text: product.description,
-        url: `${window.location.origin}/#product/${product.id}`
-      }).catch((e) => {
-        console.warn("Native share error, opening fallback modal", e);
-        setShowShareModal(true);
-      });
-    } else {
-      setShowShareModal(true);
-    }
+    setShowShareModal(true);
   };
 
   return (
@@ -252,13 +344,27 @@ export default function ProductCard({ product, onOpenDetails, onAddToCart, dict,
     >
       
       {/* Product Image Stage */}
-      <div className="relative aspect-[16/13] w-full bg-black rounded-xl overflow-hidden mb-3">
+      <div 
+        onClick={(e) => {
+          // If the target is the button or contains it, let it zoom details instead
+          const isZoomBtn = (e.target as HTMLElement).closest('.zoom-btn');
+          if (!isZoomBtn && onOpenSellerStore && product.vendor) {
+            onOpenSellerStore(product.vendor);
+          } else {
+            onOpenDetails(product);
+          }
+        }}
+        className="relative aspect-[16/13] w-full bg-black rounded-xl overflow-hidden mb-3 cursor-pointer group/img-stage"
+      >
         <motion.img
           layoutId={`card-img-${product.id}`}
-          src={product.image}
+          src={imgSrc}
+          onError={() => {
+            setImgSrc(getCategoryFallbackImage(product.category, product.id));
+          }}
           alt={product.title}
           referrerPolicy="no-referrer"
-          className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+          className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover/img-stage:scale-105"
         />
 
         {/* Live Floating Indicators */}
@@ -276,7 +382,7 @@ export default function ProductCard({ product, onOpenDetails, onAddToCart, dict,
         {/* Image Spec glance hover effect */}
         <button
           onClick={() => onOpenDetails(product)}
-          className="absolute inset-x-0 bottom-0 py-2 bg-gradient-to-t from-black via-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-[10px] font-mono font-semibold tracking-wide text-amber-500 text-center uppercase"
+          className="zoom-btn absolute inset-x-0 bottom-0 py-2 bg-gradient-to-t from-black via-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-[10px] font-mono font-semibold tracking-wide text-amber-500 text-center uppercase"
         >
           Spécification de l'article • Zoom
         </button>
@@ -406,35 +512,59 @@ export default function ProductCard({ product, onOpenDetails, onAddToCart, dict,
             </div>
 
             {/* List of comments scrolling */}
-            <div className="max-h-24 overflow-y-auto space-y-2 pr-1 custom-scrollbar">
+            <div className="max-h-56 overflow-y-auto space-y-3 pr-1 custom-scrollbar">
               {commentsList.length > 0 ? (
-                commentsList.map((c) => (
-                  <div key={c.id} className="text-[10px] leading-normal pb-1 border-b border-zinc-900/50">
-                    <div className="flex justify-between text-zinc-400 font-semibold mb-0.5">
-                      <span>{c.user}</span>
-                      <span>{c.date}</span>
-                    </div>
-                    <div className="flex flex-col gap-0.5">
-                      <p className="text-zinc-250 italic font-sans">"{c.text}"</p>
-                      {c.tags && c.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mt-0.5">
-                          {c.tags.map((tg: string, idx: number) => (
-                            <span 
-                              key={idx} 
-                              className={`text-[8px] px-1 py-0.5 rounded font-mono font-semibold ${
-                                tg.startsWith('#') 
-                                  ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' 
-                                  : 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20'
-                              }`}
-                            >
-                              {tg}
-                            </span>
-                          ))}
+                commentsList.map((c) => {
+                  const hasLikedComment = c.likedUsers?.includes("visitor_user");
+                  return (
+                    <div key={c.id} className="text-[10px] leading-normal pb-2 border-b border-zinc-900/50 flex items-start gap-2 justify-between animate-none">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1 text-zinc-400 font-semibold mb-0.5">
+                          <span>{c.user}</span>
+                          <span className="text-[8px] text-zinc-600">•</span>
+                          <span className="text-[8px] text-zinc-500">{c.date}</span>
                         </div>
-                      )}
+                        <p className="text-zinc-250 italic font-sans">"{c.text}"</p>
+                        
+                        {c.image && (
+                          <div className="mt-1.5 max-w-[140px] rounded-lg overflow-hidden border border-zinc-800/80 shadow-md">
+                            <img src={c.image} alt="Pièce jointe" className="w-full h-auto object-cover max-h-[100px]" referrerPolicy="no-referrer" />
+                          </div>
+                        )}
+
+                        {c.tags && c.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-1.5">
+                            {c.tags.map((tg: string, idx: number) => (
+                              <span 
+                                key={idx} 
+                                className={`text-[8px] px-1 py-0.5 rounded font-mono font-semibold ${
+                                  tg.startsWith('#') 
+                                    ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' 
+                                    : 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20'
+                                }`}
+                              >
+                                {tg}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Small comment like button on right side */}
+                      <button
+                        type="button"
+                        onClick={() => handleLikeComment(c.id)}
+                        className={`flex flex-col items-center gap-0.5 shrink-0 px-1 py-1 rounded hover:bg-zinc-950/40 transition-colors select-none ${
+                          hasLikedComment ? "text-red-500" : "text-zinc-500 hover:text-zinc-300"
+                        }`}
+                        title="Aimer le commentaire"
+                      >
+                        <Heart className={`w-3 h-3 ${hasLikedComment ? "fill-red-500" : ""}`} />
+                        <span className="text-[8px] font-mono">{c.likes || 0}</span>
+                      </button>
                     </div>
-                  </div>
-                ))
+                  );
+                })
               ) : (
                 <div className="py-4 text-center text-zinc-600 italic">Aucun commentaire. Soyez le premier à commenter !</div>
               )}
@@ -448,27 +578,52 @@ export default function ProductCard({ product, onOpenDetails, onAddToCart, dict,
                   value={commenterName}
                   onChange={(e) => setCommenterName(e.target.value)}
                   placeholder="Votre nom (ex: Kabasele)"
-                  className="w-full px-2 py-1 bg-zinc-950 border border-zinc-800 rounded text-[10px] focus:outline-none focus:ring-1 focus:ring-amber-500"
+                  className="w-full px-2 py-1 bg-zinc-950 border border-zinc-800 rounded text-[10px] focus:outline-none focus:ring-1 focus:ring-amber-500 text-white"
                 />
                 <input
                   type="text"
                   value={newCommentTag}
                   onChange={(e) => setNewCommentTag(e.target.value)}
                   placeholder="Tag d'ami (ex: @jean, #wax)"
-                  className="w-full px-2 py-1 bg-zinc-950 border border-zinc-800 rounded text-[10px] focus:outline-none focus:ring-1 focus:ring-amber-500"
+                  className="w-full px-2 py-1 bg-zinc-950 border border-zinc-800 rounded text-[10px] focus:outline-none focus:ring-1 focus:ring-amber-500 text-white"
                 />
               </div>
-              <div className="flex gap-1.5">
+
+              {commentImage && (
+                <div className="relative inline-block mt-1">
+                  <img src={commentImage} alt="Preview comment attachment" className="w-12 h-12 object-cover rounded-lg border border-zinc-700" />
+                  <button
+                    type="button"
+                    onClick={() => setCommentImage(null)}
+                    className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-red-600 text-white flex items-center justify-center text-[8px] font-bold hover:bg-red-500"
+                  >
+                    ✕
+                  </button>
+                </div>
+              )}
+
+              <div className="flex gap-1.5 items-center">
+                <label className="flex items-center justify-center p-1.5 rounded-lg bg-zinc-950 border border-zinc-800 hover:border-zinc-700 cursor-pointer text-zinc-500 hover:text-amber-500 transition-colors shrink-0" title="Ajouter une photo">
+                  <Camera className="w-3.5 h-3.5" />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="hidden"
+                  />
+                </label>
+
                 <input
                   type="text"
                   value={newCommentText}
                   onChange={(e) => setNewCommentText(e.target.value)}
-                  placeholder="Écrire un commentaire..."
-                  className="flex-1 px-2 py-1 bg-zinc-950 border border-zinc-800 rounded text-[10px] focus:outline-none focus:ring-1 focus:ring-amber-500"
+                  placeholder={commentImage ? "Décrivez cette photo..." : "Écrire un commentaire..."}
+                  className="flex-1 px-2 py-1 bg-zinc-950 border border-zinc-800 rounded text-[10px] focus:outline-none focus:ring-1 focus:ring-amber-500 text-white"
                 />
                 <button
                   type="submit"
-                  className="px-2.5 bg-amber-500 text-zinc-950 rounded hover:bg-amber-600 flex items-center justify-center cursor-pointer"
+                  disabled={!newCommentText.trim() && !commentImage}
+                  className="px-2.5 py-1 bg-amber-500 text-zinc-950 rounded hover:bg-amber-600 flex items-center justify-center cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Send className="w-3.5 h-3.5" />
                 </button>
@@ -661,10 +816,41 @@ export default function ProductCard({ product, onOpenDetails, onAddToCart, dict,
                 </button>
               </div>
 
+              {/* High-Fidelity Rich Preview Link Card */}
+              <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-3 text-left space-y-2 relative overflow-hidden">
+                <div className="text-[7.5px] font-mono tracking-widest text-zinc-500 uppercase">Aperçu du lien partagé</div>
+                <div className="flex gap-2.5 items-center">
+                  <img src={product.image} alt={product.title} className="w-12 h-12 rounded-lg object-cover shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <h5 className="text-[10px] font-bold text-white truncate">{product.title}</h5>
+                    <p className="text-[8.5px] text-zinc-450 line-clamp-2 leading-normal">{product.description}</p>
+                    <span className="text-[9px] font-mono font-bold text-amber-500 block mt-0.5">{isCdf ? `${product.price.toLocaleString()} CDF` : `$${product.price}`}</span>
+                  </div>
+                </div>
+              </div>
+
               <div className="space-y-1">
                 <h4 className="text-xs font-bold text-white leading-tight">{product.title}</h4>
-                <p className="text-[9px] text-zinc-500">Sélectionnez une application installée sur votre mobile :</p>
+                <p className="text-[9px] text-zinc-500">Sélectionnez une application pour recevoir ce lien :</p>
               </div>
+
+              {/* Direct Native App Trigger Button */}
+              {navigator.share && (
+                <button
+                  onClick={() => {
+                    navigator.share({
+                      title: product.title,
+                      text: product.description,
+                      url: `${window.location.origin}/#product/${product.id}`
+                    }).catch((e) => console.log("Native share cancelled", e));
+                    setShowShareModal(false);
+                  }}
+                  className="w-full py-2 bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-600 hover:to-yellow-500 text-zinc-950 font-black font-mono text-[9px] uppercase tracking-wider rounded-xl transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <Smartphone className="w-4 h-4 text-zinc-950" />
+                  <span>Applications Système Appareil</span>
+                </button>
+              )}
 
               {/* Grid of installed apps icons list */}
               <div className="grid grid-cols-4 gap-2.5 py-2">

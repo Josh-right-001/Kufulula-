@@ -1,5 +1,5 @@
-import { motion, AnimatePresence } from "motion/react";
-import { X, ShoppingBag, Flame, Sparkles, Check, HelpCircle, AlertCircle } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { X, ShoppingBag, Flame, Check, HelpCircle, AlertCircle } from "lucide-react";
 import { Product } from "../types";
 import { useState, useEffect } from "react";
 import { TranslationDictionary } from "../lib/translations";
@@ -199,7 +199,7 @@ export default function ProductDetailModal({ product, onClose, onAddToCart, dict
             <div className="mt-4 p-3 bg-zinc-900/80 border border-white/5 rounded-2xl space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-[9px] font-mono tracking-widest text-[#FF8C00] uppercase font-black flex items-center gap-1">
-                  <Sparkles className="w-3.5 h-3.5 animate-spin-slow text-[#FF8C00]" />
+                  <Flame className="w-3.5 h-3.5 animate-pulse text-[#FF8C00]" />
                   Générateur Gemini Soko Rendu
                 </span>
                 <span className="text-[8px] font-mono text-[#00FF66] bg-[#00FF66]/10 px-1.5 py-0.5 rounded-full uppercase tracking-wider font-extrabold">STUDIO LIVE</span>
@@ -228,7 +228,7 @@ export default function ProductDetailModal({ product, onClose, onAddToCart, dict
                   </span>
                 ) : (
                   <>
-                    <Sparkles className="w-3.5 h-3.5" />
+                    <Flame className="w-3.5 h-3.5 text-zinc-950" />
                     Régénérer par IA (Gemini Banana 🍌)
                   </>
                 )}
@@ -325,7 +325,7 @@ export default function ProductDetailModal({ product, onClose, onAddToCart, dict
                 <div>
                   <span className="text-[9px] uppercase font-mono text-zinc-500">Sécurité</span>
                   <p className="text-xs font-semibold text-zinc-300 flex items-center gap-1">
-                    <Sparkles className="w-3 h-3 text-amber-500" />
+                    <Check className="w-3 h-3 text-amber-500" />
                     Double KYC Escrow
                   </p>
                 </div>
@@ -356,7 +356,7 @@ export default function ProductDetailModal({ product, onClose, onAddToCart, dict
               </button>
 
               <div className="flex items-center justify-center gap-1 text-zinc-500 text-[9px] font-mono text-center">
-                <Sparkles className="w-3 h-3 text-amber-550" />
+                <Check className="w-3 h-3 text-amber-500" />
                 {dict.escrowBadge}
               </div>
             </div>

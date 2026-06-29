@@ -9,6 +9,7 @@ import { getAuth, signInWithPopup, GoogleAuthProvider, signOut as fbSignOut } fr
 import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc, getDoc, getDocFromServer } from "firebase/firestore";
 import firebaseConfig from "../../firebase-applet-config.json";
 import { Product, DirectTransaction, UserAuth, UserRole } from "../types";
+import { fetchProducts } from "./api";
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
@@ -910,32 +911,19 @@ export const KDb = {
   // Products with interactive updates
   async getProducts(): Promise<Product[]> {
     try {
+      const apiProducts = await fetchProducts();
       const colRef = collection(db, "products");
       const snapshot = await getDocs(colRef);
+      const list: Product[] = [];
       if (!snapshot.empty) {
-        const list: Product[] = [];
         snapshot.forEach(docSnap => {
           const item = docSnap.data();
           if (item && item.id && item.title) {
             list.push(item as Product);
           }
         });
-        if (list.length > 0) {
-          return list.filter((p: Product) => !p.isDraft);
-        }
       }
-      
-      // Database empty or only contains incomplete documents: let's perform self-healing auto-seed
-      console.log("Firestore empty or lacks products catalog. Seeding INITIAL_PRODUCTS...");
-      const list = getStorageItem("k_products_v3", INITIAL_PRODUCTS);
-      for (const p of list) {
-        try {
-          await setDoc(doc(db, "products", p.id), p);
-        } catch (err) {
-          console.warn(`Failed to seed product ${p.id}:`, err);
-        }
-      }
-      return list.filter((p: Product) => !p.isDraft);
+      return [...list, ...apiProducts].filter((p: Product) => !p.isDraft);
     } catch (e) {
       console.warn("Firestore read failed, using localStorage fallback:", e);
     }

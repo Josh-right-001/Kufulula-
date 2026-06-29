@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence } from "framer-motion";
 import { 
   Map, FileSpreadsheet, Calendar, StickyNote, Mail, Bell, 
   MapPin, Navigation, Compass, ShieldCheck, CheckCircle, Clock,
   Send, User, Folder, Plus, Trash, Search, FileText, Phone,
   ShieldAlert, LogIn, RefreshCw, ChevronRight, CheckCircle2,
-  ExternalLink, ArrowLeft, Download, PlusCircle, PenTool, AlertTriangle, Sparkles
+  ExternalLink, ArrowLeft, Download, PlusCircle, PenTool, AlertTriangle
 } from "lucide-react";
 import { DirectTransaction } from "../types";
 import { getAccessToken, KAuth } from "../lib/firebase";
@@ -572,7 +572,7 @@ RÉCAPITULATIF SÉCURISÉ DRC TRUST SERVICE
                 : "text-zinc-400 hover:text-white"
             }`}
           >
-            <Sparkles className="w-3.5 h-3.5 text-zinc-950" /> Google Workspace Connect
+            <Compass className="w-3.5 h-3.5 text-zinc-950" /> Google Workspace Connect
             <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-green-500 rounded-full animate-ping" />
           </button>
         </div>

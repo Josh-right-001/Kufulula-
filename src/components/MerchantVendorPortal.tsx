@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
-  X, Users, ShieldCheck, CheckCircle2, AlertTriangle, AlertCircle, Sparkles,
+  X, Users, ShieldCheck, CheckCircle2, AlertTriangle, AlertCircle,
   Building2, Globe, FileText, Camera, Mic, Volume2, ShieldAlert, Wifi,
   Smartphone, Lock, HelpCircle, ArrowLeft, ArrowRight, Upload,
   Loader2, Check, Send, Award, Percent, Star, ExternalLink, Shield, Network,
@@ -537,7 +537,7 @@ export default function MerchantVendorPortal({
                     }}
                     className="px-8 py-4 bg-[#FF8C00] hover:bg-[#ff9d24] text-zinc-950 font-mono text-xs font-black uppercase tracking-widest rounded-2xl transition-all shadow-xl shadow-orange-500/10 active:scale-95 flex items-center gap-2"
                   >
-                    <Sparkles className="w-4 h-4 text-zinc-950" />
+                    <ShieldCheck className="w-4 h-4 text-zinc-950" />
                     {text.getStarted}
                   </button>
                 </div>

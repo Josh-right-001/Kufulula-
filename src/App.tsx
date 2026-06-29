@@ -1,11 +1,12 @@
-import { useState, useEffect, useRef, ChangeEvent } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import React, { useState, useEffect, useRef, ChangeEvent, MouseEvent } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { 
-  ShoppingBag, Search, Filter, ShieldAlert, Sparkles, LogIn, LogOut, 
+  ShoppingBag, Search, Filter, ShieldAlert, LogIn, LogOut, 
   ChevronRight, RefreshCw, Smartphone, Check, Heart, Shield, HelpCircle, 
   ShieldCheck, Mic, Camera, Globe, Settings, Sliders, Play, RotateCcw,
   BookOpen, Compass, Package, Users, Eye, Sparkle, MessageCircle, Home, History,
   Palette, Type, QrCode, Copy, Download, ArrowLeft, ArrowUpRight, Share, Share2, X,
+  Star, CheckCircle, AlertCircle,
   Bell, MapPin, Music, Flame, Award, Crown, Lock, AlertTriangle, Ticket, MessageSquare, Building2
 } from "lucide-react";
 
@@ -23,6 +24,8 @@ import WorkspaceIntegrations from "./components/WorkspaceIntegrations";
 import MerchantConversationalLounge from "./components/MerchantConversationalLounge";
 import ProductCatalogGrid from "./components/ProductCatalogGrid";
 import MerchantVendorPortal from "./components/MerchantVendorPortal";
+import GiantTrianglesShowcase from "./components/GiantTrianglesShowcase";
+import MetaAccountsCenter from "./components/MetaAccountsCenter";
 
 // Static local assets safely handled by Vite
 // @ts-ignore
@@ -168,9 +171,132 @@ const FONTS: AppFont[] = [
   }
 ];
 
+interface GiantRectangleCardProps {
+  key?: any;
+  product: Product;
+  onOpenDetails: (product: Product) => void;
+  onOpenSellerStore?: (vendorName: string) => void;
+  activeTheme: any;
+}
+
+function GiantRectangleCard({ product, onOpenDetails, onOpenSellerStore, activeTheme }: GiantRectangleCardProps) {
+  const [likesCount, setLikesCount] = useState<number>(() => {
+    const saved = localStorage.getItem(`k_likes_${product.id}`);
+    return saved ? parseInt(saved) : (product.likesCount || 12);
+  });
+  const [isLiked, setIsLiked] = useState<boolean>(() => {
+    return localStorage.getItem(`k_liked_state_${product.id}`) === "true";
+  });
+  const [imgSrc, setImgSrc] = useState<string>(product.image || "");
+
+  useEffect(() => {
+    if (product.image) {
+      setImgSrc(product.image);
+    }
+  }, [product.image]);
+
+  const handleLike = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const nextLiked = !isLiked;
+    const nextCount = nextLiked ? likesCount + 1 : Math.max(0, likesCount - 1);
+    setIsLiked(nextLiked);
+    setLikesCount(nextCount);
+    localStorage.setItem(`k_liked_state_${product.id}`, nextLiked ? "true" : "false");
+    localStorage.setItem(`k_likes_${product.id}`, nextCount.toString());
+    KDb.updateProductInteractions(product.id, nextCount, product.comments || []);
+  };
+
+  const handleCardClick = () => {
+    if (onOpenSellerStore && product.vendor) {
+      onOpenSellerStore(product.vendor);
+    } else {
+      onOpenDetails(product);
+    }
+  };
+
+  return (
+    <div 
+      onClick={handleCardClick}
+      className="group relative flex flex-col justify-end h-[480px] md:h-[520px] rounded-2xl overflow-hidden border border-white/5 bg-zinc-950 transition-all duration-550 shadow-xl cursor-pointer"
+    >
+      {/* Background product image with zoom on hover */}
+      <img 
+        src={imgSrc} 
+        alt={product.title} 
+        onError={() => {
+          setImgSrc("https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=800&auto=format&fit=crop");
+        }}
+        referrerPolicy="no-referrer"
+        className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110" 
+      />
+
+      {/* Modern gradient overlay for clear contrast */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent group-hover:via-black/60 transition-all duration-300" />
+
+      {/* Floating Category Label */}
+      <div className="absolute top-3.5 left-3.5 bg-amber-500/15 backdrop-blur-md text-amber-500 text-[8px] font-black tracking-widest border border-amber-500/20 px-2 py-0.5 rounded uppercase">
+        {product.category}
+      </div>
+
+      {/* Live active Indicator */}
+      <div className="absolute top-3.5 right-3.5 bg-zinc-950/80 backdrop-blur-md text-zinc-400 text-[8px] font-mono border border-white/10 px-2 py-0.5 rounded uppercase">
+        {product.vendor}
+      </div>
+
+      {/* Dynamic Content Overlay */}
+      <div className="relative p-5 space-y-3 z-10">
+        
+        {/* Title and Pricing info (standard visible state) */}
+        <div className="space-y-1">
+          <h3 className="text-sm md:text-base font-extrabold text-white tracking-tight line-clamp-1 group-hover:text-amber-500 transition-colors">
+            {product.title}
+          </h3>
+          <p className="text-amber-500 text-xs font-mono font-bold">
+            {product.currency === "CDF" ? `${product.price.toLocaleString("fr-FR")} CDF` : `$${product.price}`}
+          </p>
+        </div>
+
+        {/* Small concise product description (slide up and fade in on hover) */}
+        <p className="text-[11px] text-zinc-300 leading-relaxed line-clamp-3 opacity-0 group-hover:opacity-100 max-h-0 group-hover:max-h-20 transition-all duration-550 overflow-hidden font-mono">
+          {product.description || "Aucune description supplémentaire disponible pour cet article d'Afrique Centrale."}
+        </p>
+
+        {/* Action Trays: Large "Voir plus" button + Small "Like" button with dynamic count */}
+        <div className="flex gap-2 pt-2.5 border-t border-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onOpenDetails(product);
+            }}
+            className="flex-1 py-2 bg-amber-500 hover:bg-amber-600 text-zinc-950 font-black font-mono text-[9.5px] uppercase tracking-wider rounded-xl transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-1.5 shadow"
+          >
+            <ShoppingBag className="w-3.5 h-3.5" />
+            <span>Voir plus</span>
+          </button>
+
+          <button
+            onClick={handleLike}
+            className={`px-3 py-2 border transition-all active:scale-95 rounded-xl cursor-pointer flex items-center gap-1.5 ${
+              isLiked 
+                ? "bg-red-600/25 border-red-500/40 text-red-500 font-bold" 
+                : "bg-zinc-900/95 border-white/10 text-zinc-400 hover:text-red-500"
+            }`}
+          >
+            <Heart className={`w-3.5 h-3.5 ${isLiked ? "fill-red-500" : ""}`} />
+            <span className="text-[9.5px] font-mono font-bold">{likesCount}</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   // Global States: View mode, active language, active theme, active font (using persistent keys)
-  const [viewMode, setViewMode] = useState<'shop' | 'favorites' | 'chat' | 'checkout' | 'workspace' | 'product-detail'>('shop');
+  const [viewMode, setViewMode] = useState<'shop' | 'favorites' | 'chat' | 'checkout' | 'workspace' | 'product-detail' | 'seller-shop' | 'settings'>('shop');
+  const [selectedSeller, setSelectedSeller] = useState<string | null>(null);
+  const [shopInitialProduct, setShopInitialProduct] = useState<Product | null>(null);
   const [similarLimit, setSimilarLimit] = useState(4);
   const [language, setLanguage] = useState<AppLanguage>(() => {
     const s = localStorage.getItem("kufulula_language");
@@ -203,6 +329,13 @@ export default function App() {
   // Is parameters modal open
   const [isParamsOpen, setIsParamsOpen] = useState(false);
   const [showMerchantPortal, setShowMerchantPortal] = useState(false);
+  const [activeSubPage, setActiveSubPage] = useState<'home' | 'about' | 'works' | 'impact' | 'awards' | 'contact'>('home');
+  const [excerptBook, setExcerptBook] = useState<string | null>(null);
+  const [donationAmount, setDonationAmount] = useState<number>(25);
+  const [donationCarrier, setDonationCarrier] = useState<string>("M-Pesa");
+  const [donationStatus, setDonationStatus] = useState<'idle' | 'pending' | 'success'>('idle');
+  const [contactForm, setContactForm] = useState({ name: "", email: "", subject: "diplomatic", message: "" });
+  const [contactStatus, setContactStatus] = useState<'idle' | 'sending' | 'success'>('idle');
 
   // System Web Permissions & KYC Verification State
   const [permissionsState, setPermissionsState] = useState(() => {
@@ -573,6 +706,145 @@ export default function App() {
   const loadCatalog = async () => {
     setLoading(true);
     const list = await KDb.getProducts();
+
+    // Define custom high-fidelity cars, phones, and tablets to satisfy specific vendor shops
+    const customShowcaseProducts: Product[] = [
+      {
+        id: "car-landcruiser",
+        title: "Toyota Land Cruiser V6 Prado 2024",
+        description: "Véhicule tout-terrain de prestige, moteur V6 turbodiesel, boîte de transfert robuste, suspensions renforcées KUFULULA Gold. Parfait pour les liaisons interprovinciales en RDC.",
+        price: 48000,
+        currency: "USD",
+        image: "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?q=80&w=800&auto=format&fit=crop",
+        category: "Electronics",
+        stock: 5,
+        vendor: "Mwanza Auto Motors",
+        tags: ["Voiture", "Auto", "Toyota", "Premium", "Kinshasa"],
+        isDraft: false,
+        isPublished: true,
+        createdAt: "2026-06-26T00:00:00Z",
+        updatedAt: "2026-06-26T00:00:00Z"
+      },
+      {
+        id: "car-gclass",
+        title: "Mercedes-Benz G63 AMG Black",
+        description: "L'icône absolue de l'autorité sur route. Blindage léger de carrosserie, intérieur cuir nappa ébène et puissance ultime pour la haute bourgeoisie de Kinshasa Gombe.",
+        price: 125000,
+        currency: "USD",
+        image: "https://images.unsplash.com/photo-1520050206274-a1ae446cb3cc?q=80&w=800&auto=format&fit=crop",
+        category: "Electronics",
+        stock: 2,
+        vendor: "Mwanza Auto Motors",
+        tags: ["Voiture", "Auto", "Mercedes", "Prestige", "Gombe"],
+        isDraft: false,
+        isPublished: true,
+        createdAt: "2026-06-26T00:00:00Z",
+        updatedAt: "2026-06-26T00:00:00Z"
+      },
+      {
+        id: "car-tucson",
+        title: "Hyundai Tucson Executive",
+        description: "SUV urbain compact, boîte automatique, écran tactile géant, consommation de carburant optimisée pour les embouteillages du boulevard du 30 Juin.",
+        price: 26000,
+        currency: "USD",
+        image: "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?q=80&w=800&auto=format&fit=crop",
+        category: "Electronics",
+        stock: 12,
+        vendor: "Mwanza Auto Motors",
+        tags: ["Voiture", "Auto", "Hyundai", "Urbain"],
+        isDraft: false,
+        isPublished: true,
+        createdAt: "2026-06-26T00:00:00Z",
+        updatedAt: "2026-06-26T00:00:00Z"
+      },
+      {
+        id: "car-hilux",
+        title: "Toyota Hilux Double Cabine 4x4",
+        description: "Le pick-up légendaire indestructible pour vos convois miniers à Kolwezi ou vos chantiers agricoles dans le Bas-Congo. Double pont renforcé.",
+        price: 34000,
+        currency: "USD",
+        image: "https://images.unsplash.com/photo-1609630875171-b1321377ee65?q=80&w=800&auto=format&fit=crop",
+        category: "Electronics",
+        stock: 8,
+        vendor: "Mwanza Auto Motors",
+        tags: ["Voiture", "Auto", "Pick-up", "Toyota", "Kolwezi"],
+        isDraft: false,
+        isPublished: true,
+        createdAt: "2026-06-26T00:00:00Z",
+        updatedAt: "2026-06-26T00:00:00Z"
+      },
+      {
+        id: "phone-infinix",
+        title: "Infinix Zero 30 Ultra 5G",
+        description: "Écran incurvé AMOLED 120Hz, appareil photo 200MP et charge ultra-rapide 180W. Design simili-cuir texturé doré.",
+        price: 320,
+        currency: "USD",
+        image: "https://images.unsplash.com/photo-1598327105666-5b89351aff97?q=80&w=800&auto=format&fit=crop",
+        category: "Electronics",
+        stock: 50,
+        vendor: "Afritech Télécom",
+        tags: ["Phone", "Téléphone", "Android", "Infinix", "5G"],
+        isDraft: false,
+        isPublished: true,
+        createdAt: "2026-06-26T00:00:00Z",
+        updatedAt: "2026-06-26T00:00:00Z"
+      },
+      {
+        id: "phone-s24",
+        title: "Samsung Galaxy S24 Ultra AI",
+        description: "Intégration d'intelligence artificielle en temps réel pour vos traductions d'affaires swahili-lingala-français, stylet S-Pen de précision et capteur photo 200MP.",
+        price: 1249,
+        currency: "USD",
+        image: "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?q=80&w=800&auto=format&fit=crop",
+        category: "Electronics",
+        stock: 25,
+        vendor: "Afritech Télécom",
+        tags: ["Phone", "Téléphone", "Android", "Samsung", "AI"],
+        isDraft: false,
+        isPublished: true,
+        createdAt: "2026-06-26T00:00:00Z",
+        updatedAt: "2026-06-26T00:00:00Z"
+      },
+      {
+        id: "phone-iphone15",
+        title: "iPhone 15 Pro Max Titanium",
+        description: "Le fleuron d'Apple avec boîtier en titane de qualité aérospatiale, puce A17 Pro ultra-puissante et zoom optique 5x pour immortaliser les couchers de soleil du fleuve Congo.",
+        price: 1399,
+        currency: "USD",
+        image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?q=80&w=800&auto=format&fit=crop",
+        category: "Electronics",
+        stock: 18,
+        vendor: "Afritech Télécom",
+        tags: ["Phone", "Téléphone", "iPhone", "Apple", "Titanium"],
+        isDraft: false,
+        isPublished: true,
+        createdAt: "2026-06-26T00:00:00Z",
+        updatedAt: "2026-06-26T00:00:00Z"
+      },
+      {
+        id: "phone-ipad",
+        title: "iPad Air 11\" M2 Liquid Retina",
+        description: "Tablette de productivité ultime pour les professionnels de l'administration et de l'éducation. Compatible Apple Pencil et Magic Keyboard.",
+        price: 699,
+        currency: "USD",
+        image: "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?q=80&w=800&auto=format&fit=crop",
+        category: "Electronics",
+        stock: 15,
+        vendor: "Afritech Télécom",
+        tags: ["Tablette", "iPad", "Apple", "Education"],
+        isDraft: false,
+        isPublished: true,
+        createdAt: "2026-06-26T00:00:00Z",
+        updatedAt: "2026-06-26T00:00:00Z"
+      }
+    ];
+
+    // Inject custom products if they don't exist
+    customShowcaseProducts.forEach((prod) => {
+      if (!list.some(p => p.id === prod.id)) {
+        list.push(prod);
+      }
+    });
     
     // Read persisted favorites from local storage to prevent loss of dynamic or custom generated items
     const storedFavsJson = localStorage.getItem("k_persistent_favorites");
@@ -1226,7 +1498,7 @@ export default function App() {
       
       {/* MODERNE FLOATING PILL CAPSULE HEADER */}
       <div className="pt-4 px-4 sticky top-0 z-40 w-full max-w-7xl mx-auto">
-        <header className={`px-4 md:px-6 py-3 rounded-2xl md:rounded-3xl flex items-center justify-between transition-all duration-300 ${
+        <header className={`px-4 md:px-6 py-3 rounded-2xl md:rounded-3xl flex items-center justify-between gap-4 transition-all duration-300 ${
           activeTheme.id === 'sahel-noir'
             ? 'bg-zinc-950/90 border border-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.15)] text-white'
             : activeTheme.id === 'terracotta-clay'
@@ -1239,45 +1511,51 @@ export default function App() {
             ? 'backdrop-blur-md bg-white/40 border border-white/60 text-zinc-900 shadow-lg'
             : 'bg-zinc-950/80 border border-white/10 backdrop-blur-md text-white shadow-xl'
         }`}>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             {/* Authentic glowing logo */}
             {activeTheme.id === 'sahel-noir' ? (
               <div className="flex items-center gap-2">
                 <div className="w-7 h-7 bg-zinc-900 border border-emerald-500/55 rounded-lg flex items-center justify-center font-bold text-[#00FF66] text-sm shadow-[0_0_8px_rgba(16,185,129,0.4)] animate-pulse">
-                  T
+                  K
                 </div>
                 <span className="text-sm md:text-base font-black tracking-widest text-white uppercase select-none font-sans">
-                  TECHNOVA
+                  KUFULULA Shop
                 </span>
               </div>
             ) : activeTheme.id === 'terracotta-clay' ? (
               <div className="flex items-center gap-2">
                 <div className="px-2 py-0.5 rounded bg-[#FAF6F0] border border-[#8F3E2B]/40 flex items-center justify-center font-serif font-black text-[#8F3E2B] text-xs">
-                  S&S
+                  👑
                 </div>
                 <span className="text-sm md:text-base font-serif font-black tracking-tight text-[#8F3E2B] select-none">
-                  🏺 Terracotta
+                  KUFULULA
                 </span>
               </div>
             ) : activeTheme.id === 'urban-brutalist' ? (
               <div className="flex items-center gap-2">
                 <div className="w-7 h-7 bg-[#004BFF] border-2 border-black rounded flex items-center justify-center font-black text-white text-sm shadow-[1.5px_1.5px_0px_0px_rgba(0,0,0,1)]">
-                  C
+                  K
                 </div>
                 <span className="text-sm md:text-base font-mono font-black tracking-tight text-black uppercase select-none">
-                  CITYGRID
+                  KUFULULA
                 </span>
               </div>
             ) : (
-              <span className="text-base md:text-xl font-black tracking-widest text-[#FF8C00] uppercase select-none font-sans flex items-center gap-1.5">
+              <button 
+                onClick={() => {
+                  setViewMode('shop');
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                className="text-base md:text-xl font-black tracking-widest text-[#FF8C00] hover:opacity-95 uppercase select-none font-sans flex items-center gap-1.5 transition-all text-left"
+              >
                 <ShieldCheck className="w-5 h-5 text-white animate-pulse" />
                 {dict.appName}
-              </span>
+              </button>
             )}
           </div>
 
           {/* Global actions: parameters trigger, cart tracker */}
-          <div className="flex items-center gap-2 md:gap-3">
+          <div className="flex items-center gap-2 md:gap-3 shrink-0">
             {/* UNIFIED PARAMETERS / LANGUAGE DIALOG TRIGGER */}
             <button
               onClick={() => setIsParamsOpen(true)}
@@ -1338,7 +1616,10 @@ export default function App() {
             exit={{ opacity: 0 }}
             className="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-10 space-y-6 md:space-y-10"
           >
-            {/* IMMERSIVE BLACK, ORANGE, WHITE HERO CARD WITH GLASSMORPHISM OUTSTANDING VISUALS */}
+
+
+
+                {/* IMMERSIVE BLACK, ORANGE, WHITE HERO CARD WITH GLASSMORPHISM OUTSTANDING VISUALS */}
             <div className={`relative overflow-hidden min-h-[420px] md:min-h-[480px] rounded-3xl p-6 md:p-10 transition-all duration-300 ${
               activeTheme.id === 'sahel-noir'
                 ? 'border border-emerald-500/30 bg-black text-white shadow-[0_0_20px_rgba(16,185,129,0.08)]'
@@ -1379,19 +1660,19 @@ export default function App() {
                         ? 'text-white bg-[#004BFF] border-2 border-black shadow-[1.5px_1.5px_0px_0px_rgba(0,0,0,1)]'
                         : 'text-[#FF8C00] bg-[#FF8C00]/10 border border-amber-500/35 shadow-[0_0_15px_rgba(255,140,0,0.15)] animate-pulse'
                     }`}>
-                      <Sparkles className="w-3.5 h-3.5" />
+                      <Compass className="w-3.5 h-3.5" />
                       {activeTheme.id === 'sahel-noir'
                         ? "FUTURE TECH | MINIMALIST ARCHITECTURE"
                         : activeTheme.id === 'terracotta-clay'
                         ? "ARTISANAT DU CONGO | BOUE ET TERRE CRUE"
                         : activeTheme.id === 'urban-brutalist'
                         ? "STREET SELECTS | ZERO COMPROMISE"
-                        : "MAISON COUTURE ISOLELE × KUFULULA SOKO"
+                        : "KUFULULA SOKO SECURE COMMERCE"
                       }
                     </span>
 
                     <span className="text-[9px] font-mono border border-white/10 bg-white/5 text-zinc-400 px-2.5 py-1 rounded-full uppercase tracking-wider font-extrabold flex items-center gap-1.5">
-                      <Crown className="w-3 h-3 text-amber-500 fill-amber-500/20" /> COLLECTION DU ROY v3.4
+                      <Crown className="w-3 h-3 text-amber-500 fill-amber-500/20" /> COMPTOIR D'AFRIQUE CENTRALE
                     </span>
                   </div>
 
@@ -1430,7 +1711,7 @@ export default function App() {
                       ? "Le grand carrefour autonome sécurisé par double signature de dépôt fiduciaire Mobile Money (Airtel, M-Pesa, Orange Money)."
                       : activeTheme.id === 'terracotta-clay'
                       ? "Découvrez l'élégance de nos pièces de terracotta façonnées à la main par nos maîtres potiers du Kongo Central."
-                      : "Achetez les créations exclusives de Haute Couture signées Isolele en toute tranquillité. Double séquestre actif pour rassurer créateurs et acquéreurs."
+                      : "Achetez les créations, services et produits d'ici en toute tranquillité d'esprit. Le double séquestre actif KUFULULA sécurise instantanément vos transactions."
                     }
                   </p>
 
@@ -1472,134 +1753,63 @@ export default function App() {
 
                 </div>
 
-                {/* Right Side: High-End Fashion & Isolele Dynamic Interactive Showcase */}
+                {/* Right Side: Sleek, Ultra-Professional Trust Escrow Flow Card */}
                 <div className="lg:col-span-5 w-full flex flex-col items-center justify-center">
-                  <div className="relative w-full max-w-[340px] p-2 bg-zinc-950/90 border border-white/10 hover:border-amber-500/50 rounded-2xl transition-all duration-550 shadow-[0_15px_35px_rgba(0,0,0,0.6)] group">
+                  <div className="relative w-full max-w-[340px] p-5 bg-zinc-950/90 border border-white/10 hover:border-amber-500/40 rounded-2xl transition-all duration-550 shadow-[0_15px_35px_rgba(0,0,0,0.6)] space-y-4">
                     
-                    {/* Top luxury overlay label */}
-                    <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-amber-500 text-zinc-950 text-[8.5px] font-black font-mono tracking-widest px-3 py-1 rounded-full shadow-lg uppercase whitespace-nowrap">
-                      Chef-d'Œuvre à la Une
+                    <div className="flex justify-between items-center border-b border-white/5 pb-2.5">
+                      <span className="text-[10px] font-mono font-bold text-amber-500 tracking-wider uppercase flex items-center gap-1">
+                        <Lock className="w-3.5 h-3.5" /> K-Trust Escrow Hub
+                      </span>
+                      <span className="text-[8px] font-mono text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 px-2 py-0.5 rounded-full uppercase">
+                        Actif • 100% Sécurisé
+                      </span>
                     </div>
 
-                    {/* Master Photograph Viewer with interactive transition */}
-                    <div className="aspect-[3/4] w-full rounded-xl overflow-hidden bg-zinc-900 relative">
-                      
-                      <AnimatePresence mode="wait">
-                        {heroCoutureId === 'design' && (
-                          <motion.img
-                            key="img-design"
-                            initial={{ opacity: 0, scale: 1.05 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.6 }}
-                            src={kufululaDesignOptions}
-                            alt="Isolele Royal Costume"
-                            referrerPolicy="no-referrer"
-                            className="w-full h-full object-cover"
-                          />
-                        )}
-                        {heroCoutureId === 'buste' && (
-                          <motion.img
-                            key="img-buste"
-                            initial={{ opacity: 0, scale: 1.05 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.6 }}
-                            src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=600&auto=format&fit=crop"
-                            alt="Buste Perlé Kongo"
-                            referrerPolicy="no-referrer"
-                            className="w-full h-full object-cover"
-                          />
-                        )}
-                        {heroCoutureId === 'bambou' && (
-                          <motion.img
-                            key="img-bambou"
-                            initial={{ opacity: 0, scale: 1.05 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.6 }}
-                            src="https://images.unsplash.com/photo-1582533561751-ef6f6ab93a2e?q=80&w=600&auto=format&fit=crop"
-                            alt="Robe Gala Osier"
-                            referrerPolicy="no-referrer"
-                            className="w-full h-full object-cover"
-                          />
-                        )}
-                      </AnimatePresence>
+                    <p className="text-[10px] text-zinc-400 leading-relaxed font-mono">
+                      Visualisation en temps réel de notre mécanisme de double signature fiduciaire Mobile Money :
+                    </p>
 
-                      <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent opacity-90" />
-                      
-                      {/* Interactive Float Controls */}
-                      <div className="absolute bottom-3 inset-x-3 text-center space-y-1">
-                        <span className="text-[8px] font-mono text-zinc-400 tracking-widest uppercase">
-                          Sa Majesté Roi Kufulula couture elite
-                        </span>
-                        <h4 className="text-xs font-black text-white tracking-tight uppercase truncate">
-                          {heroCoutureId === 'design' ? "Le Sceptre Court Royal d'Isolele" : heroCoutureId === 'buste' ? "Buste Perlé Masque Kongo" : "Robe de Gala Osier & Bambou"}
-                        </h4>
-                        <div className="flex items-center justify-between pt-1 border-t border-white/5">
-                          <span className="text-[10px] font-mono text-amber-500 font-bold">Prix de Référence</span>
-                          <span className="text-[10px] font-mono text-white font-bold">
-                            {heroCoutureId === 'design' ? "$12,500" : heroCoutureId === 'buste' ? "850,000 CDF" : "$3,400"}
-                          </span>
+                    <div className="space-y-3">
+                      {/* Step 1 */}
+                      <div className="flex gap-3 items-start bg-white/5 p-2.5 rounded-xl border border-white/5">
+                        <div className="p-1.5 bg-amber-500/10 rounded-lg text-amber-500">
+                          <Check className="w-3.5 h-3.5" />
+                        </div>
+                        <div className="space-y-0.5">
+                          <h4 className="text-[10px] font-bold text-white font-mono uppercase">1. Consignation du Dépôt</h4>
+                          <p className="text-[9px] text-zinc-400">L'acheteur verse les fonds sur le séquestre sécurisé Kufulula.</p>
+                        </div>
+                      </div>
+
+                      {/* Step 2 */}
+                      <div className="flex gap-3 items-start bg-white/5 p-2.5 rounded-xl border border-white/5">
+                        <div className="p-1.5 bg-cyan-500/10 rounded-lg text-cyan-400">
+                          <Check className="w-3.5 h-3.5" />
+                        </div>
+                        <div className="space-y-0.5">
+                          <h4 className="text-[10px] font-bold text-white font-mono uppercase">2. Expédition & Signature</h4>
+                          <p className="text-[9px] text-zinc-400">Le vendeur expédie le bien. Les deux parties valident la conformité.</p>
+                        </div>
+                      </div>
+
+                      {/* Step 3 */}
+                      <div className="flex gap-3 items-start bg-white/5 p-2.5 rounded-xl border border-white/5">
+                        <div className="p-1.5 bg-emerald-500/10 rounded-lg text-emerald-400">
+                          <ShieldCheck className="w-3.5 h-3.5" />
+                        </div>
+                        <div className="space-y-0.5">
+                          <h4 className="text-[10px] font-bold text-white font-mono uppercase">3. Déblocage Garanti</h4>
+                          <p className="text-[9px] text-zinc-400">Les fonds sont reversés en toute transparence et traçabilité.</p>
                         </div>
                       </div>
                     </div>
 
-                    {/* Quick change tabs with miniatures (the "fashion modes") */}
-                    <div className="mt-2.5 grid grid-cols-3 gap-1.5 p-1 bg-zinc-900/60 rounded-xl border border-white/5">
-                      <button
-                        onClick={() => setHeroCoutureId('design')}
-                        className={`relative aspect-square rounded-lg overflow-hidden border transition-all ${
-                          heroCoutureId === 'design' ? 'border-amber-500 scale-95 shadow-md' : 'border-white/5 hover:border-white/20'
-                        }`}
-                        title="Option 1"
-                      >
-                        <img src={kufululaDesignOptions} className="w-full h-full object-cover" alt="Thumb Design" referrerPolicy="no-referrer" />
-                        <span className="absolute bottom-0.5 right-0.5 text-[7px] bg-black/60 px-1 py-0.2 rounded font-mono text-amber-500">Isolele</span>
-                      </button>
-
-                      <button
-                        onClick={() => setHeroCoutureId('buste')}
-                        className={`relative aspect-square rounded-lg overflow-hidden border transition-all ${
-                          heroCoutureId === 'buste' ? 'border-amber-500 scale-95 shadow-md' : 'border-white/5 hover:border-white/20'
-                        }`}
-                        title="Option 2"
-                      >
-                        <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=600&auto=format&fit=crop" className="w-full h-full object-cover" alt="Thumb Buste" referrerPolicy="no-referrer" />
-                        <span className="absolute bottom-0.5 right-0.5 text-[7px] bg-black/60 px-1 py-0.2 rounded font-mono text-amber-500">Coutre</span>
-                      </button>
-
-                      <button
-                        onClick={() => setHeroCoutureId('bambou')}
-                        className={`relative aspect-square rounded-lg overflow-hidden border transition-all ${
-                          heroCoutureId === 'bambou' ? 'border-amber-500 scale-95 shadow-md' : 'border-white/5 hover:border-white/20'
-                        }`}
-                        title="Option 3"
-                      >
-                        <img src="https://images.unsplash.com/photo-1582533561751-ef6f6ab93a2e?q=80&w=600&auto=format&fit=crop" className="w-full h-full object-cover" alt="Thumb Osier" referrerPolicy="no-referrer" />
-                        <span className="absolute bottom-0.5 right-0.5 text-[7px] bg-black/60 px-1 py-0.2 rounded font-mono text-amber-500">Osier</span>
-                      </button>
+                    <div className="pt-2 text-center">
+                      <span className="text-[8.5px] font-mono text-zinc-500 uppercase tracking-widest">
+                        ZÉRO ARNAQUE • ZÉRO TRACAS
+                      </span>
                     </div>
-
-                    {/* Open details CTA of highlighted product */}
-                    <button
-                      onClick={() => {
-                        const lookId = heroCoutureId === 'design' 
-                          ? 'fashion-isolele-design' 
-                          : heroCoutureId === 'buste' 
-                          ? 'fashion-isolele-panthere-nuit' 
-                          : 'fashion-isolele-mousse-moutarde';
-                        const targetProduct = allProducts.find(p => p.id === lookId || p.id === `prod-${lookId}`);
-                        if (targetProduct) {
-                          setSelectedProduct(targetProduct);
-                          window.scrollTo({ top: 0, behavior: 'smooth' });
-                        }
-                      }}
-                      className="w-full mt-2.5 py-1.5 bg-amber-500/10 hover:bg-amber-500 text-amber-500 hover:text-zinc-950 font-black font-mono text-[9px] uppercase tracking-wider rounded-xl border border-amber-500/20 hover:border-amber-500 transition-all flex items-center justify-center gap-1 cursor-pointer"
-                    >
-                      <Eye className="w-3.5 h-3.5" />
-                      Consulter la fiche technique Escrow
-                    </button>
 
                   </div>
                 </div>
@@ -1608,74 +1818,32 @@ export default function App() {
 
             </div>
 
-            {/* SCROLL-REVEALED ENDLESS HORIZONTAL MARQUEE */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 30 }}
-              whileInView={{ opacity: 1, scale: 1, y: 0 }}
-              viewport={{ once: false, margin: "-100px" }}
-              transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-              className="relative overflow-hidden w-full py-6 rounded-3xl border border-white/5 bg-zinc-950/20 backdrop-blur-md shadow-2xl"
-            >
-              <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-zinc-950 via-zinc-950/80 to-transparent z-10 pointer-events-none" />
-              <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-zinc-950 via-zinc-950/80 to-transparent z-10 pointer-events-none" />
-              
-              <div className="px-6 mb-4 flex justify-between items-center">
-                <span className="text-[10px] font-mono tracking-widest text-[#FF8C00] uppercase font-black flex items-center gap-1.5 animate-pulse">
-                  <Sparkles className="w-3.5 h-3.5" />
-                  Défilé d'Art Haute Couture Isolele — Galerie Royale
-                </span>
-                <span className="text-[9px] font-mono text-zinc-500 uppercase tracking-widest">
-                  ↔ Défilement Infini Continu
-                </span>
-              </div>
-
-              <div className="animate-marquee flex gap-4 w-max">
-                {[
-                  { title: "Buste Perlé Masque Kongo", img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=600&auto=format&fit=crop", desc: "Manteau velours d'apparat" },
-                  { title: "Rituel Souffleur de Feu", img: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=600&auto=format&fit=crop", desc: "Fibres de raphia sauvage" },
-                  { title: "Robe Osier & Bambou", img: "https://images.unsplash.com/photo-1582533561751-ef6f6ab93a2e?q=80&w=600&auto=format&fit=crop", desc: "Lattes de bambou tressé" },
-                  { title: "Robe Traîne Royale", img: "https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=600&auto=format&fit=crop", desc: "Drapé de cérémonie d'or" },
-                  { title: "Félin Impérial", img: "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?q=80&w=600&auto=format&fit=crop", desc: "Manteau léopard de parade" },
-                  { title: "Veste & Cape Mandala", img: "https://images.unsplash.com/photo-1539109136881-3be0616acf4b?q=80&w=600&auto=format&fit=crop", desc: "Dessins géométriques or" },
-                  { title: "Crépuscule au Flambeau", img: "https://images.unsplash.com/photo-1540206395-68808572332f?w=600&auto=format&fit=crop", desc: "Soie de lin de la dote" },
-                  { title: "Blazer Jute Recyclée", img: "https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=600&auto=format&fit=crop", desc: "Éthique dandy éco-conçu" },
-                  { title: "Franges Moutarde & Tresses", img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=600&auto=format&fit=crop", desc: "Portrait de reine à coiffe" }
-                ].concat([
-                  { title: "Buste Perlé Masque Kongo", img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=600&auto=format&fit=crop", desc: "Manteau velours d'apparat" },
-                  { title: "Rituel Souffleur de Feu", img: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?q=80&w=600&auto=format&fit=crop", desc: "Fibres de raphia sauvage" },
-                  { title: "Robe Osier & Bambou", img: "https://images.unsplash.com/photo-1582533561751-ef6f6ab93a2e?q=80&w=600&auto=format&fit=crop", desc: "Lattes de bambou tressé" },
-                  { title: "Robe Traîne Royale", img: "https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=600&auto=format&fit=crop", desc: "Drapé de cérémonie d'or" },
-                  { title: "Félin Impérial", img: "https://images.unsplash.com/photo-1512436991641-6745cdb1723f?q=80&w=600&auto=format&fit=crop", desc: "Manteau léopard de parade" },
-                  { title: "Veste & Cape Mandala", img: "https://images.unsplash.com/photo-1539109136881-3be0616acf4b?q=80&w=600&auto=format&fit=crop", desc: "Dessins géométriques or" },
-                  { title: "Crépuscule au Flambeau", img: "https://images.unsplash.com/photo-1540206395-68808572332f?w=600&auto=format&fit=crop", desc: "Soie de lin de la dote" },
-                  { title: "Blazer Jute Recyclée", img: "https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=600&auto=format&fit=crop", desc: "Éthique dandy éco-conçu" },
-                  { title: "Franges Moutarde & Tresses", img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=600&auto=format&fit=crop", desc: "Portrait de reine à coiffe" }
-                ]).map((item, idx) => (
-                  <div key={idx} className="flex-none w-56 p-2 rounded-2xl bg-zinc-900 border border-white/5 shadow-md">
-                    <div className="aspect-[4/3] w-full rounded-xl overflow-hidden mb-2 relative group cursor-pointer">
-                      <img src={item.img} alt={item.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-                      <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity p-2 text-center">
-                        <span className="text-[10px] font-mono text-[#FF8C00] uppercase tracking-widest font-black">Fashion Isolele</span>
-                        <p className="text-[8px] text-zinc-300 mt-1 font-sans">{item.title}</p>
-                      </div>
-                    </div>
-                    <p className="text-[11px] font-extrabold text-white tracking-tight truncate">{item.title}</p>
-                    <p className="text-[9px] text-[#FF8C00] font-mono truncate">{item.desc}</p>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
+            {/* INTERACTIVE GIANT TRIANGLES MARQUEE */}
+            <div className="relative overflow-visible w-full">
+              <GiantTrianglesShowcase
+                onViewProduct={(id) => {
+                  const found = allProducts.find(p => p.id === id);
+                  if (found) {
+                    setSelectedProduct(found);
+                    setViewMode('product-detail');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }
+                }}
+                onLikeToggle={(id) => handlePinterestLikeToggle(id)}
+                isLiked={(id) => localStorage.getItem("k_liked_state_" + id) === "true"}
+              />
+            </div>
 
             {/* EXCLUSIVE ISOLELE COLLECTION & DRC MOST LOVED PRODUCT SHOWCASE */}
-            <div className="space-y-4 pt-2">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-white/5 pb-2">
+            <div className="space-y-6 pt-4">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-white/5 pb-2.5">
                 <div>
-                  <h2 className="text-xs font-mono font-black tracking-widest text-[#FF8C00] uppercase flex items-center gap-1.5">
-                    <Sparkles className="w-4 h-4 text-white animate-pulse" />
-                    Collection Pro Exclusive Isolele & Coups de Cœur République Démocratique du Congo 🇨🇩
+                  <h2 className="text-sm font-sans font-black tracking-tight text-[#FF8C00] uppercase flex items-center gap-1.5">
+                    <Compass className="w-4 h-4 text-white animate-pulse" />
+                    Le Soko Prestige : Sélection d'Afrique Centrale 🇨🇩
                   </h2>
                   <p className="text-[10px] text-zinc-400 mt-0.5">
-                    Drapés et coutures royales sous l'égide de la Couronne Soko
+                    Fiches de présentation interactives avec survol immersif, spécifications et double signature active.
                   </p>
                 </div>
                 <span className="text-[9px] font-mono text-zinc-500 uppercase mt-1 sm:mt-0 tracking-wider">
@@ -1684,140 +1852,58 @@ export default function App() {
               </div>
 
               {/* Grid with 5 columns for vertical rectangles */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
                 {allProducts
                   .filter(p => p.id.includes("isolele") || p.id.includes("fashion-isolele") || p.id.includes("superwax-congo"))
                   .slice(0, 5) // Display first 5 matched
-                  .map((p) => {
-                    const isLovedRdc = p.id.includes("superwax-congo");
-                    return (
-                      <div 
-                        key={p.id}
-                        className="relative flex flex-col justify-between p-3.5 bg-zinc-950/70 hover:bg-zinc-950 border border-white/5 hover:border-amber-500/40 rounded-2xl transition-all duration-300 group shadow-lg"
-                      >
-                        {isLovedRdc ? (
-                          <div className="absolute top-2.5 right-2 balance bg-red-600 text-white text-[7.5px] font-bold tracking-wider px-2 py-0.5 rounded-full shadow z-10 animate-pulse uppercase flex items-center gap-1">
-                            <Heart className="w-2.5 h-2.5 fill-white stroke-white animate-pulse" /> RDC : Plus Aimé
-                          </div>
-                        ) : (
-                          <div className="absolute top-2.5 left-2.5 bg-amber-500/10 text-amber-500 text-[7px] font-black border border-amber-500/20 px-1.5 py-0.5 rounded uppercase">
-                            Isolele Pro
-                          </div>
-                        )}
-
-                        <div 
-                          onClick={() => {
-                            setSelectedProduct(p);
-                            setViewMode('product-detail');
-                            window.scrollTo({ top: 0, behavior: 'smooth' });
-                          }}
-                          className="aspect-[3/4] w-full rounded-xl overflow-hidden bg-zinc-900 mb-3 cursor-pointer relative"
-                        >
-                          <img 
-                            src={p.image} 
-                            alt={p.title} 
-                            referrerPolicy="no-referrer"
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                          <div className="absolute bottom-2 inset-x-2 py-1 bg-black/60 backdrop-blur-sm rounded text-center text-[8px] font-mono text-amber-500 opacity-0 group-hover:opacity-100 transition-opacity">
-                            Zoom Angles • Détails
-                          </div>
-                        </div>
-
-                        <div className="space-y-1">
-                          <h3 
-                            onClick={() => {
-                              setSelectedProduct(p);
-                              setViewMode('product-detail');
-                              window.scrollTo({ top: 0, behavior: 'smooth' });
-                            }}
-                            className="text-xs font-bold text-white hover:text-amber-500 transition-colors cursor-pointer line-clamp-1 tracking-tight"
-                          >
-                            {p.title}
-                          </h3>
-                          <div className="flex justify-between items-center text-[10px]">
-                            <span className="text-zinc-550 truncate max-w-[65px]">{p.vendor}</span>
-                            <span className="text-amber-500 font-mono font-bold">
-                              {p.currency === "CDF" ? `${p.price.toLocaleString()} CDF` : `$${p.price}`}
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* Action buttons inside vertical rectangle card */}
-                        <div className="mt-3.5 pt-2.5 border-t border-white/5 space-y-2">
-                          <button
-                            onClick={() => handleAddToCart(p)}
-                            className="w-full h-8 bg-amber-500 hover:bg-amber-600 text-zinc-950 font-black rounded-lg text-[9px] font-mono uppercase flex items-center justify-center gap-1 transition-all active:scale-95 cursor-pointer"
-                          >
-                            <ShoppingBag className="w-3 h-3" />
-                            <span>Ajouter au panier</span>
-                          </button>
-
-                          <div className="grid grid-cols-3 gap-0.5 text-[8px] font-mono text-zinc-400">
-                            <button
-                              onClick={() => {
-                                setSelectedProduct(p);
-                                setViewMode('product-detail');
-                                window.scrollTo({ top: 0, behavior: 'smooth' });
-                              }}
-                              className="flex flex-col items-center gap-0.5 py-1 hover:bg-zinc-900 rounded text-red-500 cursor-pointer"
-                            >
-                              <Heart className="w-3 h-3 fill-red-500" />
-                              <span>{p.likesCount || 12} Likes</span>
-                            </button>
-
-                            <button
-                              onClick={() => {
-                                setSelectedProduct(p);
-                                setViewMode('product-detail');
-                                window.scrollTo({ top: 0, behavior: 'smooth' });
-                              }}
-                              className="flex flex-col items-center gap-0.5 py-1 hover:bg-zinc-900 rounded text-amber-500 cursor-pointer"
-                            >
-                              <MessageCircle className="w-3 h-3" />
-                              <span>{p.comments?.length || 2} Cmds</span>
-                            </button>
-
-                            <button
-                              onClick={() => {
-                                setSelectedProduct(p);
-                                setViewMode('product-detail');
-                                window.scrollTo({ top: 0, behavior: 'smooth' });
-                              }}
-                              className="flex flex-col items-center gap-0.5 py-1 hover:bg-zinc-900 rounded text-cyan-400 cursor-pointer"
-                            >
-                              <Share2 className="w-3 h-3" />
-                              <span>Partages</span>
-                            </button>
-                          </div>
-                        </div>
-
-                      </div>
-                    );
-                  })}
+                  .map((p) => (
+                    <GiantRectangleCard
+                      key={p.id}
+                      product={p}
+                      onOpenDetails={(item) => {
+                        setSelectedProduct(item);
+                        setViewMode('product-detail');
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                      }}
+                      onOpenSellerStore={(vendorName) => {
+                        setSelectedSeller(vendorName);
+                        setViewMode('seller-shop');
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                      }}
+                      activeTheme={activeTheme}
+                    />
+                  ))}
               </div>
             </div>
 
-            {/* REVOLUTIONARY DYNAMIC PRODUCT CATALOG GRID WITH FUZZY SEARCH, AUTO-COMPLETE, AND ATOMIC SHIMMER FILTERS */}
-            <ProductCatalogGrid
-              products={allProducts}
-              loading={loading}
-              onOpenDetails={(item) => {
-                setSelectedProduct(item);
-                setViewMode('product-detail');
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              onAddToCart={handleAddToCart}
-              dict={dict}
-              activeTheme={activeTheme}
-              selectedCategory={selectedCategory}
-              setSelectedCategory={setSelectedCategory}
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-              onVoiceTrigger={handleVoiceTrigger}
-              onLensCameraTrigger={handleOpenAiLens}
-            />
+
+
+                {/* REVOLUTIONARY DYNAMIC PRODUCT CATALOG GRID WITH FUZZY SEARCH, AUTO-COMPLETE, AND ATOMIC SHIMMER FILTERS */}
+                <ProductCatalogGrid
+                  products={allProducts}
+                  loading={loading}
+                  onOpenDetails={(item) => {
+                    setSelectedProduct(item);
+                    setViewMode('product-detail');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  onAddToCart={handleAddToCart}
+                  dict={dict}
+                  activeTheme={activeTheme}
+                  selectedCategory={selectedCategory}
+                  setSelectedCategory={setSelectedCategory}
+                  searchQuery={searchQuery}
+                  setSearchQuery={setSearchQuery}
+                  onVoiceTrigger={handleVoiceTrigger}
+                  onLensCameraTrigger={handleOpenAiLens}
+                  onOpenSellerStore={(vendorName) => {
+                    setSelectedSeller(vendorName);
+                    setViewMode('seller-shop');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  onOpenExcerpt={(bookId) => setExcerptBook(bookId)}
+                />
+
           </motion.main>
         )}
 
@@ -1983,7 +2069,7 @@ export default function App() {
                 {/* Horizontal perspective scrollbar (At least 5 perspectives) */}
                 <div className="space-y-2">
                   <p className="text-[10px] font-mono text-zinc-400 uppercase tracking-widest flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-[#FF8C00]" />
+                    <Compass className="w-3.5 h-3.5 text-[#FF8C00]" />
                     Galerie multi-angles d'orfèvre (Défiler horizontalement ↔)
                   </p>
                   
@@ -2194,6 +2280,185 @@ export default function App() {
           </motion.main>
         )}
 
+        {/* SELLER STORE VIEW */}
+        {viewMode === 'seller-shop' && selectedSeller && (
+          <motion.main
+            key="seller-shop-view"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-10 space-y-8"
+          >
+            {(() => {
+              const info = (() => {
+                const name = (selectedSeller || "").toLowerCase();
+                if (name.includes("mwanza") || name.includes("auto") || name.includes("motor")) {
+                  return {
+                    cover: "https://images.unsplash.com/photo-1562141961-b5d144297424?q=80&w=1200&auto=format&fit=crop",
+                    avatar: "https://images.unsplash.com/photo-1566492031773-4f4e44671857?q=80&w=200&auto=format&fit=crop",
+                    sector: "Voitures de Prestige & Logistique d'Afrique Centrale",
+                    bio: "Premier concessionnaire premium de Kinshasa spécialisé dans l'importation de véhicules neufs et d'occasion certifiés. Adaptabilité tout-terrain pour les routes congolaises.",
+                    location: "Limete Industriel, Kinshasa (DRC)"
+                  };
+                } else if (name.includes("afritech") || name.includes("télécom") || name.includes("telecom") || name.includes("phone")) {
+                  return {
+                    cover: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1200&auto=format&fit=crop",
+                    avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=200&auto=format&fit=crop",
+                    sector: "Téléphonie Mobile, Tablettes & Matériel Réseau",
+                    bio: "Distributeur agréé des plus grandes marques mondiales d'appareils intelligents (Apple, Samsung, Infinix). Garantie constructeur de 12 mois incluse.",
+                    location: "Gombe Center, Kinshasa (DRC)"
+                  };
+                } else if (name.includes("isolele") || name.includes("couture") || name.includes("wax") || name.includes("mode") || name.includes("roi")) {
+                  return {
+                    cover: "https://images.unsplash.com/photo-1558769132-cb1aea458c5e?q=80&w=1200&auto=format&fit=crop",
+                    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop",
+                    sector: "Haute Couture & Prêt-à-Porter Africain",
+                    bio: "Maison de mode contemporaine spécialisée dans le wax, le basin et les parures d'Afrique Centrale revisitées.",
+                    location: "Gombe, Kinshasa (DRC)"
+                  };
+                } else if (name.includes("café") || name.includes("loma") || name.includes("food") || name.includes("miel") || name.includes("ferme") || name.includes("coopérative")) {
+                  return {
+                    cover: "https://images.unsplash.com/photo-1447933601403-0c6688de566e?q=80&w=1200&auto=format&fit=crop",
+                    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200&auto=format&fit=crop",
+                    sector: "Agriculture & Produits Bio du Terroir",
+                    bio: "Coopérative de producteurs indépendants pour la torréfaction de café d'altitude et de miel sauvage de Kivu.",
+                    location: "Goma, Nord-Kivu (DRC)"
+                  };
+                } else if (name.includes("ébène") || name.includes("sculp") || name.includes("art") || name.includes("bois") || name.includes("congo")) {
+                  return {
+                    cover: "https://images.unsplash.com/photo-1612196808214-b8e1d6145a8c?q=80&w=1200&auto=format&fit=crop",
+                    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=200&auto=format&fit=crop",
+                    sector: "Ébénisterie & Art d'Exception",
+                    bio: "Atelier familial de sculpture fine sur bois d'ébène et bronze, gardien des drapes et statuettes commémoratives.",
+                    location: "Lubumbashi, Haut-Katanga (DRC)"
+                  };
+                }
+                return {
+                  cover: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1200&auto=format&fit=crop",
+                  avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=200&auto=format&fit=crop",
+                  sector: "Technologie & Services Digitaux",
+                  bio: "Fournisseur certifié de routeurs connectés, kits d'énergie solaire ruraux et modems de communication par satellite.",
+                  location: "Limete, Kinshasa (DRC)"
+                };
+              })();
+
+              const sellerProducts = allProducts.filter(p => p.vendor === selectedSeller);
+
+              return (
+                <div className="space-y-8">
+                  {/* Banner & Cover Row */}
+                  <div className="relative rounded-3xl overflow-hidden border border-white/5 bg-zinc-900 h-48 md:h-64 shadow-lg">
+                    <img
+                      src={info.cover}
+                      alt={selectedSeller}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/20 to-transparent" />
+                    
+                    {/* Back button */}
+                    <button
+                      onClick={() => {
+                        setViewMode('shop');
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                      }}
+                      className="absolute top-4 left-4 px-4 py-2 bg-zinc-950/90 border border-white/10 text-zinc-300 hover:text-amber-500 rounded-xl text-[10.5px] font-mono font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-md cursor-pointer"
+                    >
+                      <ArrowLeft className="w-4 h-4" /> Retourner au Soko
+                    </button>
+                  </div>
+
+                  {/* Seller Profiler Card with verified indicators */}
+                  <div className="relative -mt-16 md:-mt-24 px-6 md:px-10">
+                    <div className="p-6 md:p-8 rounded-3xl bg-zinc-950 border border-white/10 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.8)] backdrop-blur-xl space-y-6">
+                      <div className="flex flex-col md:flex-row gap-6 items-start md:items-center">
+                        <img
+                          src={info.avatar}
+                          alt={selectedSeller}
+                          className="w-20 h-20 md:w-28 md:h-28 rounded-2xl object-cover border-4 border-amber-500 shadow-md bg-zinc-900"
+                        />
+                        <div className="space-y-2 flex-1">
+                          <div className="flex flex-wrap items-center gap-2.5">
+                            <h1 className="text-xl md:text-3xl font-sans font-black text-white tracking-tight">
+                              {selectedSeller}
+                            </h1>
+                            <span className="bg-amber-500 text-zinc-950 text-[8px] font-black tracking-widest font-mono uppercase px-2 py-0.5 rounded-full flex items-center gap-1 shadow">
+                              <ShieldCheck className="w-3.5 h-3.5" /> Vendeur Certifié
+                            </span>
+                          </div>
+
+                          <p className="text-xs text-amber-500 font-mono font-semibold">
+                            {info.sector}
+                          </p>
+
+                          <p className="text-[11px] md:text-xs text-zinc-400 max-w-3xl leading-relaxed">
+                            {info.bio}
+                          </p>
+
+                          <div className="flex flex-wrap items-center gap-4 text-[10px] font-mono text-zinc-500 pt-1.5">
+                            <span className="flex items-center gap-1">
+                              <MapPin className="w-3.5 h-3.5 text-amber-500" /> {info.location}
+                            </span>
+                            <span className="w-1 h-1 rounded-full bg-zinc-700" />
+                            <span className="flex items-center gap-1">
+                              <Star className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500" /> 4.9/5 (18 avis clients)
+                            </span>
+                            <span className="w-1 h-1 rounded-full bg-zinc-700" />
+                            <span className="flex items-center gap-1 text-green-400">
+                              <CheckCircle className="w-3.5 h-3.5 text-green-400" /> K-Trust Gold • Séquestre Actif
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Seller Catalog Title */}
+                  <div className="pt-4 border-t border-white/5 space-y-1.5">
+                    <h2 className="text-sm font-sans font-black tracking-widest text-[#FF8C00] uppercase">
+                      Boutique de {selectedSeller} ({sellerProducts.length} articles disponibles)
+                    </h2>
+                    <p className="text-[10px] text-zinc-500 leading-relaxed font-mono">
+                      Achetez en toute sécurité grâce à notre séquestre fiduciaire Mobile Money. Aucun doublon d'images garanti.
+                    </p>
+                  </div>
+
+                  {/* Seller Catalog Grid */}
+                  {sellerProducts.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                      {sellerProducts.map((p) => (
+                        <ProductCard
+                          key={p.id}
+                          product={p}
+                          onOpenDetails={(item) => {
+                            setSelectedProduct(item);
+                            setViewMode('product-detail');
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                          }}
+                          onAddToCart={handleAddToCart}
+                          dict={dict}
+                          activeTheme={activeTheme}
+                          onOpenSellerStore={(vendorName) => {
+                            setSelectedSeller(vendorName);
+                            setViewMode('seller-shop');
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                          }}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="py-12 text-center rounded-3xl bg-zinc-900/40 border border-white/5 space-y-2">
+                      <AlertCircle className="w-10 h-10 text-amber-500/60 mx-auto animate-bounce" />
+                      <p className="text-xs font-mono text-zinc-500 uppercase tracking-widest">
+                        Aucun autre produit publié par ce vendeur pour le moment.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+          </motion.main>
+        )}
+
         {/* CHAT/CONVERSATION MERCHANT LOUNGE */}
         {viewMode === 'chat' && (
           <motion.div
@@ -2241,6 +2506,37 @@ export default function App() {
             <WorkspaceIntegrations
               transaction={successfulTransaction}
               onResetCheckout={handleResetCheckout}
+            />
+          </motion.div>
+        )}
+
+        {/* FACEBOOK META-STYLE ACCOUNTS CENTER VIEW */}
+        {viewMode === 'settings' && (
+          <motion.div
+            key="settings-view"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            className="w-full"
+          >
+            <MetaAccountsCenter
+              isOpen={true}
+              onClose={() => setViewMode('shop')}
+              currentUser={currentUser}
+              onAddProduct={(prod) => {
+                setAllProducts((prev) => [prod, ...prev]);
+                setFilteredProducts((prev) => [prod, ...prev]);
+              }}
+              language={language}
+              setLanguage={setLanguage}
+              activeTheme={activeTheme}
+              setActiveTheme={setActiveTheme}
+              THEMES={THEMES}
+              activeFont={activeFont}
+              setActiveFont={setActiveFont}
+              FONTS={FONTS}
+              permissionsState={permissionsState}
+              onTogglePermission={handleTogglePermission}
             />
           </motion.div>
         )}
@@ -2384,7 +2680,7 @@ export default function App() {
               <div className="pt-4 border-t border-white/5 space-y-3">
                 <div className="bg-zinc-950/80 p-3.5 rounded-2xl border border-orange-500/10 space-y-2">
                   <div className="flex items-center gap-1.5 text-[10px] font-mono text-[#FF8C00] font-bold uppercase tracking-wider">
-                    <Sparkles className="w-3.5 h-3.5 text-orange-400 animate-pulse" />
+                    <ShieldCheck className="w-3.5 h-3.5 text-orange-400" />
                     ESPACE MARCHAND • PRO HUB
                   </div>
                   <p className="text-[10px] text-zinc-400 leading-normal font-sans">
@@ -2667,6 +2963,67 @@ export default function App() {
         )}
       </AnimatePresence>
 
+      {/* BOOK EXCERPT MODAL */}
+      <AnimatePresence>
+        {excerptBook && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-zinc-900 border border-amber-500/30 rounded-3xl p-6 max-w-xl w-full relative overflow-hidden text-left"
+            >
+              <button
+                onClick={() => setExcerptBook(null)}
+                className="absolute top-4 right-4 text-zinc-400 hover:text-white"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 border-b border-white/5 pb-3">
+                  <span className="text-2xl">📖</span>
+                  <div>
+                    <h3 className="text-sm font-mono font-black text-amber-500 uppercase">
+                      {excerptBook === 'zaire' ? "ZAIÏRE : Le Prince du Kongo" : "WOLF OF CONGO : Le Prince de Kinshasa"}
+                    </h3>
+                    <p className="text-[10px] text-zinc-400 font-mono">Lecture de l'extrait officiel</p>
+                  </div>
+                </div>
+
+                <div className="text-zinc-300 text-xs md:text-sm leading-relaxed font-serif max-h-[300px] overflow-y-auto pr-2 space-y-3 italic select-none">
+                  {excerptBook === 'zaire' ? (
+                    <>
+                      <p>"Au cœur de la forêt équatoriale, là où le fleuve Congo dessine une boucle majestueuse, l'ancien Royaume des Pindi gardait jalousement ses mystères.</p>
+                      <p>Le Prince héritier s'avança devant l'autel de pierre. Dans sa main droite reposait le Collier du Destin, hérité de ses ancêtres. Les saphirs gravés d'écritures précoloniales pulsaient d'un éclat d'un autre monde.</p>
+                      <p>— 'Le récit ne sera plus jamais écrit par d'autres,' murmura-t-il, alors que la double signature de l'accord s'illuminait au-dessus des eaux.'"</p>
+                    </>
+                  ) : (
+                    <>
+                      <p>"Grandir à Kinshasa n'est pas seulement apprendre à vivre ; c'est apprendre à danser sous l'orage.</p>
+                      <p>Éloigné du confort douillet, j'ai vu la persévérance briller dans les yeux de ma mère chaque soir de retard systémique. C'est de là, des poussières rouges des rues populeuses, que s'est éveillée l'intégrité de ma destinée royale.</p>
+                      <p>La royauté n'est pas une question de couronne dorée, mais de fardeau de responsabilité partagée pour élever tout un peuple vers la lumière de la souveraineté complète."</p>
+                    </>
+                  )}
+                </div>
+
+                <div className="border-t border-white/5 pt-4 text-center">
+                  <p className="text-[10px] text-zinc-500 font-mono mb-2">
+                    Commandez la version intégrale en séquestre Mobile Money direct.
+                  </p>
+                  <button
+                    onClick={() => setExcerptBook(null)}
+                    className="px-6 py-2 bg-gradient-to-r from-orange-500 to-amber-500 text-zinc-950 font-mono text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-md active:scale-95"
+                  >
+                    Fermer l'extrait
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       {/* VOICE SEARCH MODAL OVERLAY */}
       <AnimatePresence>
         {showVoiceSearchModal && (
@@ -2775,7 +3132,7 @@ export default function App() {
               {/* Modal Header */}
               <div className="flex justify-between items-center pb-2 border-b border-white/5">
                 <div className="flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-cyan-400 animate-pulse" />
+                  <Compass className="w-5 h-5 text-cyan-400 animate-pulse" />
                   <h3 className="text-xs font-mono uppercase tracking-widest text-cyan-400 font-bold">
                     KUFULULA GOOGLE LENS AI
                   </h3>
@@ -2937,7 +3294,7 @@ export default function App() {
                         onClick={handleTriggerAiLensSearch}
                         className="w-full py-3 px-4 bg-cyan-400 hover:bg-cyan-500 text-zinc-950 rounded-xl font-mono text-xs font-black tracking-wider uppercase transition-all disabled:opacity-20 flex items-center justify-center gap-2 shadow-md shadow-cyan-400/10 active:scale-95"
                       >
-                        <Sparkles className="w-4 h-4 fill-zinc-950 text-zinc-950 animate-pulse" />
+                        <Compass className="w-4 h-4 text-zinc-950 animate-pulse" />
                         Lancer l'Analyse Visuelle (Lens)
                       </button>
                     </div>
@@ -3541,8 +3898,12 @@ export default function App() {
             {/* Dock Item 7: Réglages */}
             <button
                id="nav-btn-settings"
-              onClick={() => setIsParamsOpen(true)}
-              className="flex flex-col items-center gap-1 text-zinc-500 hover:text-white transition-all select-none"
+              onClick={() => setViewMode('settings')}
+              className={`flex flex-col items-center gap-1 transition-all select-none ${
+                viewMode === 'settings' 
+                  ? (activeTheme.id === 'abysses' ? "text-cyan-400 scale-105 font-bold" : activeTheme.id === 'glass-water' ? "text-slate-800 scale-105 font-bold" : "text-[#FF8C00] scale-105 font-bold") 
+                  : "text-zinc-500 hover:text-white"
+              }`}
             >
               <Settings className="w-5 h-5" />
               <span className="text-[8px] font-mono uppercase tracking-tight">Réglages</span>
@@ -3617,7 +3978,7 @@ export default function App() {
                 <div className={`absolute inset-0 rounded-full border-4 border-t-transparent animate-spin ${
                   activeTheme.id === 'abysses' ? 'border-cyan-400' : 'border-amber-500'
                 }`} />
-                <Sparkles className={`w-10 h-10 absolute inset-0 m-auto animate-pulse ${
+                <Compass className={`w-10 h-10 absolute inset-0 m-auto animate-pulse ${
                   activeTheme.id === 'abysses' ? 'text-cyan-400' : 'text-amber-500'
                 }`} />
               </div>

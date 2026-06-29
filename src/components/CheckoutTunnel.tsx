@@ -1,9 +1,9 @@
 import { useState, useRef, useEffect } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence } from "framer-motion";
 import { 
   ShieldCheck, Camera, CreditCard, ChevronRight, CheckCircle2, 
   HelpCircle, AlertCircle, RefreshCw, Smartphone, DollarSign, MapPin, 
-  User, Mail, ArrowRight, Shield, Zap, Sparkles 
+  User, Mail, ArrowRight, Shield, Zap 
 } from "lucide-react";
 import { DirectTransaction, CartItem, PaymentMethod } from "../types";
 import { KDb } from "../lib/firebase";
