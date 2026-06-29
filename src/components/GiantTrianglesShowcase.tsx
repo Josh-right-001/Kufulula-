@@ -116,9 +116,7 @@ export default function GiantTrianglesShowcase({ onViewProduct, onLikeToggle, is
 
   return (
     <div className="relative w-full py-8 overflow-hidden rounded-3xl border border-white/5 bg-zinc-950/20 backdrop-blur-md shadow-2xl">
-      {/* Background gradients for ambient depth */}
-      <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-zinc-950 via-zinc-950/80 to-transparent z-10 pointer-events-none" />
-      <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-zinc-950 via-zinc-950/80 to-transparent z-10 pointer-events-none" />
+      {/* Background gradients for ambient depth removed as per request */}
 
       {/* Header section without Sparkles icon */}
       <div className="px-6 mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
@@ -127,7 +125,7 @@ export default function GiantTrianglesShowcase({ onViewProduct, onLikeToggle, is
             PRODUITS PHARES EN TENDANCE & VIRAUX D'AFRIQUE
           </span>
           <h2 className="text-sm font-sans font-black text-white uppercase mt-0.5 tracking-tight">
-            TRIANGLES GÉANTS INTERACTIFS • KUFULULA SELECTION
+            PRODUITS GÉANTS INTERACTIFS • KUFULULA SELECTION
           </h2>
         </div>
         <span className="text-[9px] font-mono text-zinc-500 uppercase tracking-widest bg-zinc-900/60 border border-white/5 px-2.5 py-1 rounded-full">
@@ -160,12 +158,9 @@ export default function GiantTrianglesShowcase({ onViewProduct, onLikeToggle, is
                 onClick={() => setActiveHover(isHovered ? null : uniqueKey)}
                 className="relative w-80 h-[480px] flex-none transition-all duration-500 ease-[0.16, 1, 0.3, 1]"
               >
-                {/* 1. Triangle Shape Container clipped into upward pointing vertical triangle */}
+                {/* 1. Image Container full rectangle */}
                 <div
-                  className="absolute inset-0 bg-zinc-900 overflow-hidden border border-white/10 shadow-lg transition-transform duration-500 ease-out"
-                  style={{
-                    clipPath: "polygon(50% 0%, 100% 100%, 0% 100%)",
-                  }}
+                  className="absolute inset-0 bg-zinc-900 overflow-hidden rounded-3xl border border-white/10 shadow-lg transition-transform duration-500 ease-out"
                 >
                   {/* Product Background Image */}
                   <img

@@ -472,12 +472,9 @@ export default function ProductCard({ product, onOpenDetails, onAddToCart, dict,
           {/* Reaction 4: Negotiate (Bargain) Button */}
           <button
             onClick={() => {
-              setShowNegotiation(!showNegotiation);
-              setShowComments(false);
+              window.dispatchEvent(new CustomEvent('openNegotiation', { detail: product }));
             }}
-            className={`flex flex-col items-center gap-1.5 py-1.5 rounded-lg text-zinc-400 transition-colors hover:bg-zinc-900 ${
-              showNegotiation ? "text-[#FF8C00] font-bold" : ""
-            }`}
+            className={`flex flex-col items-center gap-1.5 py-1.5 rounded-lg text-zinc-400 transition-colors hover:bg-zinc-900 hover:text-[#FF8C00]`}
           >
             <Handshake className="w-4 h-4 text-[#FF8C00]" />
             <span className="text-[#FF8C00] font-semibold">{dict.negotiate}</span>

@@ -27,6 +27,7 @@ import MerchantVendorPortal from "./components/MerchantVendorPortal";
 import GiantTrianglesShowcase from "./components/GiantTrianglesShowcase";
 import MetaAccountsCenter from "./components/MetaAccountsCenter";
 import { LoadingScreen } from "./components/LoadingScreen";
+import ProductNegotiationChat from "./components/ProductNegotiationChat";
 
 // Static local assets safely handled by Vite
 // @ts-ignore
@@ -299,6 +300,7 @@ export default function App() {
   const [selectedSeller, setSelectedSeller] = useState<string | null>(null);
   const [currentUser, setCurrentUser] = useState<UserAuth | null>(null);
   const [shopInitialProduct, setShopInitialProduct] = useState<Product | null>(null);
+  const [negotiatingProduct, setNegotiatingProduct] = useState<Product | null>(null);
   const [similarLimit, setSimilarLimit] = useState(4);
   const [language, setLanguage] = useState<AppLanguage>(() => {
     const s = localStorage.getItem("kufulula_language");
@@ -330,6 +332,12 @@ export default function App() {
 
   useEffect(() => {
     KAuth.getCurrentUser().then(setCurrentUser);
+  }, []);
+
+  useEffect(() => {
+    const handleNegotiation = (e: any) => setNegotiatingProduct(e.detail);
+    window.addEventListener('openNegotiation', handleNegotiation as any);
+    return () => window.removeEventListener('openNegotiation', handleNegotiation as any);
   }, []);
 
   // Is parameters modal open
@@ -711,7 +719,30 @@ export default function App() {
 
   const loadCatalog = async () => {
     setLoading(true);
-    const list = await KDb.getProducts();
+    let list: Product[] = [];
+    try {
+      const res = await fetch("https://fakestoreapi.com/products");
+      const fakeProducts = await res.json();
+      list = fakeProducts.map((p: any) => ({
+        id: `fake-${p.id}`,
+        title: p.title,
+        description: p.description,
+        price: p.price,
+        currency: "USD",
+        image: p.image,
+        category: p.category,
+        stock: 50,
+        vendor: "Fakestore Merchant",
+        tags: [p.category],
+        isDraft: false,
+        isPublished: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }));
+    } catch (e) {
+      console.error("Failed to fetch fakestore API", e);
+      list = await KDb.getProducts();
+    }
 
     // Define custom high-fidelity cars, phones, and tablets to satisfy specific vendor shops
     const customShowcaseProducts: Product[] = [
@@ -1439,6 +1470,15 @@ export default function App() {
       <AnimatePresence>
         {loading && <LoadingScreen />}
       </AnimatePresence>
+      <AnimatePresence>
+        {negotiatingProduct && (
+          <ProductNegotiationChat
+            product={negotiatingProduct}
+            onClose={() => setNegotiatingProduct(null)}
+            activeTheme={activeTheme}
+          />
+        )}
+      </AnimatePresence>
       
       {/* Dynamic Theme skinning & Flavour Mix typography injection */}
       <style>{`
@@ -1834,8 +1874,9 @@ export default function App() {
                 onViewProduct={(id) => {
                   const found = allProducts.find(p => p.id === id);
                   if (found) {
-                    setSelectedProduct(found);
-                    setViewMode('product-detail');
+                    setShopInitialProduct(found);
+                    setSelectedSeller(found.vendor);
+                    setViewMode('seller-shop');
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }
                 }}
@@ -1871,8 +1912,9 @@ export default function App() {
                       key={p.id}
                       product={p}
                       onOpenDetails={(item) => {
-                        setSelectedProduct(item);
-                        setViewMode('product-detail');
+                        setShopInitialProduct(item);
+                        setSelectedSeller(item.vendor);
+                        setViewMode('seller-shop');
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                       }}
                       onOpenSellerStore={(vendorName) => {
@@ -1893,8 +1935,9 @@ export default function App() {
                   products={allProducts}
                   loading={loading}
                   onOpenDetails={(item) => {
-                    setSelectedProduct(item);
-                    setViewMode('product-detail');
+                    setShopInitialProduct(item);
+                    setSelectedSeller(item.vendor);
+                    setViewMode('seller-shop');
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
                   onAddToCart={handleAddToCart}
@@ -1956,8 +1999,10 @@ export default function App() {
                         <div 
                           className={`relative rounded-2xl overflow-hidden cursor-pointer ${hClass}`}
                           onClick={() => {
-                            setSelectedProduct(p);
-                            setViewMode('product-detail');
+                            setShopInitialProduct(p);
+                            setSelectedSeller(p.vendor);
+                            setViewMode('seller-shop');
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
                           }}
                         >
                           <img 
@@ -1978,8 +2023,10 @@ export default function App() {
                         <div className="p-3.5 space-y-2">
                           <h3 
                             onClick={() => {
-                              setSelectedProduct(p);
-                              setViewMode('product-detail');
+                              setShopInitialProduct(p);
+                              setSelectedSeller(p.vendor);
+                              setViewMode('seller-shop');
+                              window.scrollTo({ top: 0, behavior: 'smooth' });
                             }}
                             className="text-xs font-black tracking-tight leading-snug truncate hover:text-[#FF8C00] transition-colors cursor-pointer"
                           >
@@ -2422,38 +2469,97 @@ export default function App() {
                     </div>
                   </div>
 
+                  {shopInitialProduct && (
+                    <div className="pt-4 border-t border-white/5 space-y-4">
+                      <div className="rounded-3xl border border-white/5 bg-zinc-950/40 p-4 md:p-6 flex flex-col md:flex-row gap-6 items-center md:items-start">
+                        <img 
+                          src={shopInitialProduct.image} 
+                          alt={shopInitialProduct.title}
+                          className="w-48 h-48 object-contain rounded-2xl bg-white p-4 shadow-xl"
+                        />
+                        <div className="space-y-4">
+                          <h2 className="text-xl md:text-2xl font-black text-white">{shopInitialProduct.title}</h2>
+                          <div className="text-2xl font-bold text-[#FF8C00]">{shopInitialProduct.price} {shopInitialProduct.currency}</div>
+                          <p className="text-sm text-zinc-400 leading-relaxed max-w-2xl">{shopInitialProduct.description}</p>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleAddToCart(shopInitialProduct);
+                            }}
+                            className="px-6 py-3 bg-[#FF8C00] hover:bg-amber-500 text-black font-bold uppercase text-xs tracking-wider rounded-xl transition-colors"
+                          >
+                            Ajouter au panier
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Seller Catalog Title */}
-                  <div className="pt-4 border-t border-white/5 space-y-1.5">
+                  <div className="pt-4 border-t border-white/5 space-y-1.5 mt-8">
                     <h2 className="text-sm font-sans font-black tracking-widest text-[#FF8C00] uppercase">
-                      Boutique de {selectedSeller} ({sellerProducts.length} articles disponibles)
+                      Boutique de {selectedSeller} - Articles similaires
                     </h2>
                     <p className="text-[10px] text-zinc-500 leading-relaxed font-mono">
-                      Achetez en toute sécurité grâce à notre séquestre fiduciaire Mobile Money. Aucun doublon d'images garanti.
+                      Achetez en toute sécurité grâce à notre séquestre fiduciaire Mobile Money.
                     </p>
                   </div>
 
-                  {/* Seller Catalog Grid */}
+                  {/* Seller Catalog Grid - Pinterest Style */}
                   {sellerProducts.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                      {sellerProducts.map((p) => (
-                        <ProductCard
-                          key={p.id}
-                          product={p}
-                          onOpenDetails={(item) => {
-                            setSelectedProduct(item);
-                            setViewMode('product-detail');
-                            window.scrollTo({ top: 0, behavior: 'smooth' });
-                          }}
-                          onAddToCart={handleAddToCart}
-                          dict={dict}
-                          activeTheme={activeTheme}
-                          onOpenSellerStore={(vendorName) => {
-                            setSelectedSeller(vendorName);
-                            setViewMode('seller-shop');
-                            window.scrollTo({ top: 0, behavior: 'smooth' });
-                          }}
-                        />
-                      ))}
+                    <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-5 space-y-5">
+                      {sellerProducts
+                        .filter(p => !shopInitialProduct || p.id !== shopInitialProduct.id)
+                        .filter(p => !shopInitialProduct || p.category === shopInitialProduct.category)
+                        .map((p, idx) => {
+                        const heights = ["h-64", "h-80", "h-72", "h-96", "h-[280px]", "h-[400px]", "h-[320px]"];
+                        const hClass = heights[idx % heights.length];
+                        
+                        return (
+                          <div 
+                            key={p.id}
+                            className="break-inside-avoid relative group overflow-hidden rounded-3xl border border-white/5 bg-zinc-950/40 p-2 text-white transition-all duration-300 hover:shadow-2xl hover:border-white/20 mb-5"
+                          >
+                            <div 
+                              className={`relative rounded-2xl overflow-hidden cursor-pointer ${hClass}`}
+                              onClick={() => {
+                                setShopInitialProduct(p);
+                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                              }}
+                            >
+                              <img 
+                                src={p.image} 
+                                alt={p.title} 
+                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                              />
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
+                                <span className="text-[10px] font-mono tracking-widest text-amber-500 uppercase font-bold flex items-center gap-1">
+                                  <Eye className="w-3 h-3" />
+                                  Voir l'article
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="p-3.5 space-y-2">
+                              <h3 
+                                onClick={() => {
+                                  setShopInitialProduct(p);
+                                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                                }}
+                                className="text-xs font-black tracking-tight leading-snug truncate hover:text-[#FF8C00] transition-colors cursor-pointer"
+                              >
+                                {p.title}
+                              </h3>
+                              <p className="text-[10px] text-zinc-400 line-clamp-2 leading-relaxed">
+                                {p.description}
+                              </p>
+                              <div className="font-bold text-amber-500 text-xs">
+                                {p.price} {p.currency}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   ) : (
                     <div className="py-12 text-center rounded-3xl bg-zinc-900/40 border border-white/5 space-y-2">

@@ -6,14 +6,16 @@
 
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithPopup, GoogleAuthProvider, signOut as fbSignOut } from "firebase/auth";
-import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc, getDoc, getDocFromServer } from "firebase/firestore";
+import { initializeFirestore, collection, getDocs, doc, setDoc, deleteDoc, getDoc, getDocFromServer } from "firebase/firestore";
 import firebaseConfig from "../../firebase-applet-config.json";
 import { Product, DirectTransaction, UserAuth, UserRole } from "../types";
 import { fetchProducts } from "./api";
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app, (firebaseConfig as any).firestoreDatabaseId); // CRITICAL: The app will break without this line
+export const db = initializeFirestore(app, {
+  experimentalForceLongPolling: true,
+}, (firebaseConfig as any).firestoreDatabaseId); // CRITICAL: The app will break without this line
 export const auth = getAuth(app);
 
 // Handle Firestore Errors (Mandated by SKILL.md guide)
