@@ -1677,10 +1677,18 @@ export default function App() {
                 ? 'border border-[#E8DFD0] bg-gradient-to-tr from-[#FAF6F0] to-[#EAD8C3] text-[#4E2A25] shadow-sm'
                 : activeTheme.id === 'urban-brutalist'
                 ? 'border-2 border-black bg-white text-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]'
-                : 'border border-white/5 bg-gradient-to-tr from-black via-zinc-950 to-zinc-900/40 text-white shadow-2xl'
+                : 'border border-white/5 bg-zinc-950 text-white shadow-2xl'
             }`}>
               
               {/* Visual backdrop accents */}
+              <div 
+                className="absolute inset-0 bg-cover bg-center bg-no-repeat pointer-events-none z-0" 
+                style={{ 
+                  backgroundImage: "url('https://storage.googleapis.com/aistudio-user-assets/e3860bb4-712f-45e0-b6f7-b5caef718305.jpeg')",
+                  opacity: activeTheme.id === 'urban-brutalist' || activeTheme.id === 'terracotta-clay' ? 0.1 : 0.6
+                }} 
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent pointer-events-none z-0" />
               <div className="absolute inset-0 bg-grid-pattern opacity-10 pointer-events-none" />
               {activeTheme.id !== 'urban-brutalist' && (
                 <>
@@ -1697,7 +1705,7 @@ export default function App() {
               <div className="relative w-full h-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-center z-10">
                 
                 {/* Left Side: Elegant Branding and Copy */}
-                <div className="lg:col-span-7 space-y-4 md:space-y-6">
+                <div className="lg:col-span-7 space-y-4 md:space-y-6 bg-black/40 backdrop-blur-sm p-6 md:p-8 rounded-3xl border border-white/10">
                   
                   {/* Luxury Badging */}
                   <div className="flex flex-wrap items-center gap-2">

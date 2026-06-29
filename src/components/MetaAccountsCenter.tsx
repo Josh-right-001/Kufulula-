@@ -45,6 +45,24 @@ export default function MetaAccountsCenter({
     "profile" | "personal-info" | "security" | "google-pay" | "onboarding" | "vendor-dashboard" | "preferences"
   >("profile");
 
+  // Personal Info State
+  const [personalInfo, setPersonalInfo] = useState(() => {
+    const saved = localStorage.getItem("k_personal_info");
+    return saved ? JSON.parse(saved) : {
+      fullName: currentUser?.displayName || "Kabamba Jean-Paul",
+      email: currentUser?.email || "jp.kabamba@kufulula.cd",
+      phone: "+243 821 908 678",
+      address: "72, Avenue de la République, Quartier Royal, Gombe, Kinshasa",
+      region: "RDC (République Démocratique du Congo)"
+    };
+  });
+
+  const handlePersonalInfoChange = (field: keyof typeof personalInfo, value: string) => {
+    const newInfo = { ...personalInfo, [field]: value };
+    setPersonalInfo(newInfo);
+    localStorage.setItem("k_personal_info", JSON.stringify(newInfo));
+  };
+
   // Merchant State
   const [isMerchantVerified, setIsMerchantVerified] = useState(() => {
     return localStorage.getItem("k_merchant_verified") === "true";
@@ -319,17 +337,27 @@ export default function MetaAccountsCenter({
 
                 <div className="space-y-3.5">
                   {[
-                    { label: "Nom complet officiel", value: "Kabamba Jean-Paul" },
-                    { label: "Adresse e-mail de contact", value: "jp.kabamba@kufulula.cd" },
-                    { label: "Numéro de téléphone mobile money", value: "+243 821 908 678" },
-                    { label: "Adresse physique de livraison", value: "72, Avenue de la République, Quartier Royal, Gombe, Kinshasa" },
-                    { label: "Région fiscale principale", value: "RDC (République Démocratique du Congo)" }
-                  ].map((info, idx) => (
-                    <div key={idx} className="p-4 rounded-2xl bg-zinc-900/40 border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 hover:border-white/10 transition-colors">
-                      <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">{info.label}</span>
-                      <span className="text-xs font-sans font-bold text-white text-right">{info.value}</span>
+                    { key: "fullName", label: "Nom complet officiel", type: "text" },
+                    { key: "email", label: "Adresse e-mail de contact", type: "email" },
+                    { key: "phone", label: "Numéro de téléphone mobile money", type: "tel" },
+                    { key: "address", label: "Adresse physique de livraison", type: "text" },
+                    { key: "region", label: "Région fiscale principale", type: "text" }
+                  ].map((info) => (
+                    <div key={info.key} className="p-4 rounded-2xl bg-zinc-900/40 border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-white/10 transition-colors">
+                      <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider shrink-0 w-1/3">{info.label}</span>
+                      <input 
+                        type={info.type}
+                        value={personalInfo[info.key as keyof typeof personalInfo]}
+                        onChange={(e) => handlePersonalInfoChange(info.key as keyof typeof personalInfo, e.target.value)}
+                        className="w-full sm:w-2/3 text-xs font-sans font-bold text-white bg-zinc-950/50 border border-white/10 rounded-xl px-3 py-2 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all text-left sm:text-right"
+                      />
                     </div>
                   ))}
+                </div>
+                <div className="pt-2 flex justify-end">
+                  <button className="px-5 py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-mono text-[10px] font-black uppercase tracking-wider rounded-xl transition-all shadow-md active:scale-95 flex items-center gap-1.5 cursor-pointer">
+                    <Check className="w-4 h-4" /> Sauvegarder les modifications
+                  </button>
                 </div>
               </div>
             )}
