@@ -457,6 +457,33 @@ export default function MerchantVendorPortal({
     }
   };
 
+  const isStepValid = () => {
+    switch (activeStep) {
+      case 1:
+        return formData.fullName.trim() !== "" && formData.emailAddress.trim() !== "" && formData.operationalAddress.trim() !== "";
+      case 2:
+        return formData.productTitle.trim() !== "" && formData.productPrice > 0;
+      case 3:
+        return formData.docNumber.trim() !== "" && formData.rccmText.trim() !== "";
+      case 4:
+        return formData.docImage !== "";
+      case 5:
+        return formData.faceImage !== "";
+      case 6:
+        return formData.voiceRecordedUrl !== "";
+      case 7:
+        return formData.trustGuardianName.trim() !== "" && formData.trustGuardianPhone.trim() !== "";
+      case 8:
+        return formData.firmwareVersion.trim() !== "";
+      case 9:
+        return formData.enteredSMSCode.trim() !== "";
+      case 10:
+        return formData.storeName.trim() !== "" && formData.storeBio.trim() !== "";
+      default:
+        return true;
+    }
+  };
+
   return (
     <div id="vendor-portal-container" className="fixed inset-0 z-50 overflow-y-auto bg-zinc-950 flex items-center justify-center font-sans">
       <AnimatePresence mode="wait">
@@ -1335,8 +1362,8 @@ export default function MerchantVendorPortal({
                 <button
                   type="button"
                   onClick={handleNextStep}
-                  disabled={submitting}
-                  className="px-6 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-zinc-950 rounded-xl text-xs font-mono font-black uppercase tracking-wider flex items-center gap-1.5 shadow-md active:scale-95 transition-all"
+                  disabled={submitting || !isStepValid()}
+                  className="px-6 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 disabled:opacity-40 text-zinc-950 rounded-xl text-xs font-mono font-black uppercase tracking-wider flex items-center gap-1.5 shadow-md active:scale-95 transition-all"
                 >
                   {submitting ? (
                     <>

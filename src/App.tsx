@@ -26,6 +26,7 @@ import ProductCatalogGrid from "./components/ProductCatalogGrid";
 import MerchantVendorPortal from "./components/MerchantVendorPortal";
 import GiantTrianglesShowcase from "./components/GiantTrianglesShowcase";
 import MetaAccountsCenter from "./components/MetaAccountsCenter";
+import { LoadingScreen } from "./components/LoadingScreen";
 
 // Static local assets safely handled by Vite
 // @ts-ignore
@@ -296,6 +297,7 @@ export default function App() {
   // Global States: View mode, active language, active theme, active font (using persistent keys)
   const [viewMode, setViewMode] = useState<'shop' | 'favorites' | 'chat' | 'checkout' | 'workspace' | 'product-detail' | 'seller-shop' | 'settings'>('shop');
   const [selectedSeller, setSelectedSeller] = useState<string | null>(null);
+  const [currentUser, setCurrentUser] = useState<UserAuth | null>(null);
   const [shopInitialProduct, setShopInitialProduct] = useState<Product | null>(null);
   const [similarLimit, setSimilarLimit] = useState(4);
   const [language, setLanguage] = useState<AppLanguage>(() => {
@@ -325,6 +327,10 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem("kufulula_font", activeFont.id);
   }, [activeFont]);
+
+  useEffect(() => {
+    KAuth.getCurrentUser().then(setCurrentUser);
+  }, []);
 
   // Is parameters modal open
   const [isParamsOpen, setIsParamsOpen] = useState(false);
@@ -1430,6 +1436,10 @@ export default function App() {
       style={{ fontFamily: activeFont.fontFamily }} 
       className={`min-h-screen ${activeTheme.bgClass} ${activeTheme.textClass} transition-all duration-300 relative pb-24`}
     >
+      <AnimatePresence>
+        {loading && <LoadingScreen />}
+      </AnimatePresence>
+      
       {/* Dynamic Theme skinning & Flavour Mix typography injection */}
       <style>{`
         ${activeFont.id === 'flavour-mix' ? `
