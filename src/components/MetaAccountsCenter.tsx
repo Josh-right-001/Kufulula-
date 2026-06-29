@@ -71,6 +71,8 @@ export default function MetaAccountsCenter({
   // Onboarding Steps State
   const [onboardingStep, setOnboardingStep] = useState(1);
   const [scannedDoc, setScannedDoc] = useState<string | null>(null);
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
+  const [cameraDocType, setCameraDocType] = useState<string | null>(null);
   const [isScanning, setIsScanning] = useState(false);
   const [scanProgress, setScanProgress] = useState(0);
   const [scannedData, setScannedData] = useState<any | null>(null);
@@ -122,9 +124,15 @@ export default function MetaAccountsCenter({
 
   // Document scan simulation (using Google Document AI)
   const handleStartScan = (docType: string) => {
+    setCameraDocType(docType);
+    setIsCameraOpen(true);
+  };
+
+  const handleCaptureImage = () => {
+    setIsCameraOpen(false);
     setIsScanning(true);
     setScanProgress(0);
-    setScannedDoc(docType);
+    setScannedDoc(cameraDocType);
 
     const interval = setInterval(() => {
       setScanProgress((prev) => {
@@ -134,7 +142,7 @@ export default function MetaAccountsCenter({
           // Set Scanned Data
           setScannedData({
             name: "KABAMBA JEAN-PAUL",
-            idNumber: docType === "ID" ? "DRC-ID-98721389-A" : "DRC-PP-109283-F",
+            idNumber: cameraDocType === "ID" ? "DRC-ID-98721389-A" : "DRC-PP-109283-F",
             birthday: "12/04/1988",
             origin: "Kinshasa, RDC",
             authority: "Ministère de l'Intérieur et de la Sécurité"
@@ -615,7 +623,7 @@ export default function MetaAccountsCenter({
                       </p>
                     </div>
 
-                    {!scannedDoc ? (
+                    {!scannedDoc && !isCameraOpen ? (
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <button
                           onClick={() => handleStartScan("ID")}
@@ -637,6 +645,72 @@ export default function MetaAccountsCenter({
                             <p className="text-[9px] text-zinc-500 font-mono">Passeport biométrique valide</p>
                           </div>
                         </button>
+                      </div>
+                    ) : isCameraOpen ? (
+                      <div className="relative h-80 rounded-3xl bg-black overflow-hidden flex flex-col items-center justify-center">
+                        <div className="absolute inset-0 z-0">
+                          {/* Simulated Camera Feed using a placeholder or user's webcam if available */}
+                          <video 
+                            autoPlay 
+                            playsInline 
+                            muted
+                            ref={(videoRef) => {
+                              if (videoRef && !videoRef.srcObject) {
+                                navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+                                  .then(stream => {
+                                    videoRef.srcObject = stream;
+                                  })
+                                  .catch(err => {
+                                    console.error("Camera access denied or not available:", err);
+                                  });
+                              }
+                            }}
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute inset-0 bg-black/20" /> {/* Slight dim for better overlay visibility */}
+                        </div>
+                        
+                        {/* Overlay Brackets */}
+                        <div className="absolute inset-4 sm:inset-10 border-2 border-white/20 rounded-xl pointer-events-none z-10 flex flex-col justify-between p-4">
+                          <div className="flex justify-between w-full">
+                            <div className="w-8 h-8 border-t-4 border-l-4 border-amber-500 rounded-tl-lg"></div>
+                            <div className="w-8 h-8 border-t-4 border-r-4 border-amber-500 rounded-tr-lg"></div>
+                          </div>
+                          <div className="flex justify-center items-center h-full">
+                            <p className="text-white/80 font-black text-xs sm:text-sm bg-black/50 px-3 py-1.5 rounded-full backdrop-blur-md font-sans tracking-widest text-center shadow-2xl">CADREZ LE DOCUMENT</p>
+                          </div>
+                          <div className="flex justify-between w-full">
+                            <div className="w-8 h-8 border-b-4 border-l-4 border-amber-500 rounded-bl-lg"></div>
+                            <div className="w-8 h-8 border-b-4 border-r-4 border-amber-500 rounded-br-lg"></div>
+                          </div>
+                        </div>
+
+                        {/* Camera Controls */}
+                        <div className="absolute bottom-6 left-0 right-0 flex justify-center items-center z-20 gap-8">
+                          <button onClick={() => {
+                            setIsCameraOpen(false);
+                            // Stop camera stream if we were capturing
+                            const videoEl = document.querySelector('video');
+                            if (videoEl && videoEl.srcObject) {
+                              const tracks = (videoEl.srcObject as MediaStream).getTracks();
+                              tracks.forEach(track => track.stop());
+                            }
+                          }} className="px-4 py-2 bg-black/50 backdrop-blur border border-white/10 rounded-full text-white text-xs font-mono uppercase tracking-wider">
+                            Annuler
+                          </button>
+                          <button onClick={() => {
+                            // Stop stream when capturing
+                            const videoEl = document.querySelector('video');
+                            if (videoEl && videoEl.srcObject) {
+                              const tracks = (videoEl.srcObject as MediaStream).getTracks();
+                              tracks.forEach(track => track.stop());
+                            }
+                            handleCaptureImage();
+                          }} className="w-16 h-16 rounded-full bg-white/20 backdrop-blur border-4 border-white flex items-center justify-center hover:bg-white/40 transition-colors shadow-[0_0_20px_rgba(255,255,255,0.5)] cursor-pointer">
+                            <div className="w-12 h-12 bg-white rounded-full"></div>
+                          </button>
+                          <div className="w-20"></div> {/* Spacer for symmetry */}
+                        </div>
                       </div>
                     ) : isScanning ? (
                       /* Scanning Screen with moving laser line and real time percentage */
